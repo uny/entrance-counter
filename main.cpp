@@ -46,20 +46,21 @@ public:
             cv::cvtColor(frame, gray_mat, CV_BGR2GRAY);
             cv::blur(gray_mat, gray_mat, cv::Size(3, 3));
 
-            people_detector.Detect(gray_mat, tracking_people);
             people_tracker.Track(gray_mat, tracking_people);
+            people_detector.Detect(gray_mat, tracking_people);
 
             frame.copyTo(draw_mat);
             for (TrackingPerson tracking_person : tracking_people) {
-                cv::rectangle(draw_mat, tracking_person.bounding_rect[0], cv::Scalar(0, 255, 0), 3);
-                for (int i = 0; i < tracking_person.lk_status.size(); i++) {
+                cv::rectangle(draw_mat, tracking_person.bounding_rect[1], cv::Scalar(0, 255, 0), 3);
+                for (int i = 0; i < (int)tracking_person.lk_status.size(); i++) {
 //                    if (!tracking_person.lk_status[i]) {
 //                        std::cout << "error" << std::endl;
 //                        continue;
 //                    }
 //                    std::cout << tracking_person.track_points[1][i] << std::endl;
-                    cv::circle(draw_mat, tracking_person.track_points[0][i], 1, cv::Scalar(255, 0, 0), 3);
+                    cv::circle(draw_mat, tracking_person.track_points[1][i], 1, cv::Scalar(255, 0, 0), 3);
                 }
+                tracking_person.OverwriteLog();
             }
 
             cv::imshow("debug", draw_mat);
@@ -73,8 +74,6 @@ public:
 
 int main()
 {
-    cout << "Hello World!" << endl;
-
     App app;
     app.Run();
 

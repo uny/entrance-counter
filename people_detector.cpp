@@ -28,11 +28,14 @@ void PeopleDetector::Init()
 void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &tracking_people)
 {
     cv::Mat fgmask;
+    cv::Mat roi_mat;
 
     // diff and labeled rect
     cv::Rect roi_rect;
     // HoGed rects
     std::vector<cv::Rect> person_rects;
+
+    cv::Rect intersect_rect;
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -44,6 +47,12 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
     cv::dilate(fgmask, fgmask, cv::Mat());
     cv::erode(fgmask, fgmask, cv::Mat());
 
+    cv::Mat unsharp_mask = (cv::Mat_<double>(3, 3) << -1.0 / 9, -1.0 / 9, -1.0 / 9,
+                                                      -1.0 / 9, 17.0 / 9, -1.0 / 9,
+                                                      -1.0 / 9, -1.0 / 9, -1.0 / 9);
+
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+
     cv::findContours(fgmask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     for (std::vector<cv::Point> contour : contours) {
         if (cv::contourArea(contour) < MINIMUM_AREA) {
@@ -52,11 +61,27 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
         cv::approxPolyDP(cv::Mat(contour), contours_poly, cv::arcLength(cv::Mat(contour), true) * 0.02, true);
         roi_rect = cv::boundingRect(cv::Mat(contours_poly));
 
-        // TODO: we should filter this image for edge
-        hog_.detectMultiScale(ResizeFrameForHoG(frame, roi_rect), person_rects);
+        roi_mat = ResizeFrameForHoG(frame, roi_rect);
+        cv::filter2D(roi_mat, roi_mat, -1, unsharp_mask);
+
+        hog_.detectMultiScale(roi_mat, person_rects);
 
         for (cv::Rect person_rect : person_rects) {
             JustifyPersonRect(person_rect, roi_rect);
+
+            bool overlapped = false;
+            for (int index = 0; index < tracking_people.size(); index++) {
+                intersect_rect = person_rect & tracking_people[index].bounding_rect[1];
+                if (roi_rect.area() * OVERLAP_THRESHOLD < intersect_rect.area()) {
+//                    std::cout << "interset: " << intersect_rect << std::endl;
+                    tracking_people[index].bounding_rect[1] = person_rect;
+                    overlapped = true;
+                    break;
+                }
+            }
+            if (overlapped) {
+                continue;
+            }
 
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[0] = person_rect;
@@ -66,9 +91,8 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
                                     FEATURE_MAXIMUM_NUM,
                                     FEATURE_QUALITY,
                                     FEATURE_MINIMUM_DISTANCE);
-            for (cv::Point feature_point : tracking_person.track_points[0]) {
-                JustifyFeaturePoint(feature_point, person_rect);
-            }
+            cv::cornerSubPix(frame(person_rect), tracking_person.track_points[0], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
+            tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_PREV);
             tracking_people.push_back(tracking_person);
         }
     }

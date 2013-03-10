@@ -11,7 +11,8 @@ QMAKE_LFLAGS += -std=c++11 -stdlib=libc++
 SOURCES += main.cpp \
     tracking_person.cpp \
     people_tracker.cpp \
-    people_detector.cpp
+    people_detector.cpp \
+    diff_labeler.cpp
 
 unix: LIBS += -L/usr/opencv/lib/\
 -lopencv_core\
@@ -26,4 +27,5 @@ DEPENDPATH += /usr/opencv/include
 HEADERS += \
     tracking_person.h \
     people_tracker.h \
-    people_detector.h
+    people_detector.h \
+    diff_labeler.h

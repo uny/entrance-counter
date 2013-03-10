@@ -12,6 +12,7 @@ public:
     cv::Rect bounding_rect[2];
     int missing_count;
     std::vector<uchar> lk_status;
+    std::vector<cv::Point> centers;
 
     typedef enum {
         TP_JUSTIFY_BOTH,
@@ -20,7 +21,16 @@ public:
     }TP_JUSTIFY_ENUM;
 
     TrackingPerson();
-    void JustifyFeaturesPoint(cv::Point origin, TP_JUSTIFY_ENUM select);
+    void JustifyFeaturesPoint(const cv::Point &from_point,
+                              const cv::Point &to_point,
+                              TP_JUSTIFY_ENUM select);
+    void MoveRect();
+    void OverwriteLog();
+
+private:
+    void JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features,
+                                      const cv::Point &from_point,
+                                      const cv::Point &to_point);
 };
 
 #endif // TRACKING_PERSON_H
