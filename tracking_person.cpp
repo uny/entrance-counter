@@ -34,7 +34,6 @@ void TrackingPerson::MoveRect()
         }
         sum_move_x += track_points[1][index].x - track_points[0][index].x;
         sum_move_y += track_points[1][index].y - track_points[0][index].y;
-        std::cout << track_points[0][index] << " > " << track_points[1][index] << std::endl;
         count++;
     }
     if (0 < count) {
@@ -54,18 +53,19 @@ void TrackingPerson::MoveRect()
 
 void TrackingPerson::OverwriteLog()
 {
+    std::cout << bounding_rect[1] << std::endl;
     bounding_rect[0] = bounding_rect[1];
 
-    int count = 0;
+//    int count = 0;
 
-    for (int index = 0; index < (int)track_points[1].size(); index++) {
-        if (!lk_status[index]) {
-            continue;
-        }
-        track_points[0][count] = track_points[1][index];
-        count++;
-    }
-    track_points[0].resize(count);
+//    for (int index = 0; index < (int)track_points[1].size(); index++) {
+//        if (!lk_status[index]) {
+//            continue;
+//        }
+//        track_points[0][count] = track_points[1][index];
+//        count++;
+//    }
+//    track_points[0].resize(count);
 }
 
 void TrackingPerson::JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features, const cv::Point &from_point, const cv::Point &to_point)
