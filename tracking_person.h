@@ -20,7 +20,7 @@ public:
     }TP_JUSTIFY_ENUM;
 
     TrackingPerson();
-    JustifyFeaturesPoint(cv::Point origin, TP_JUSTIFY_ENUM select);
+    void JustifyFeaturesPoint(cv::Point origin, TP_JUSTIFY_ENUM select);
 };
 
 #endif // TRACKING_PERSON_H
