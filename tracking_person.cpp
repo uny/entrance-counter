@@ -38,17 +38,18 @@ void TrackingPerson::MoveRect()
         move_x = track_points[1][index].x - track_points[0][index].x;
         move_y = track_points[1][index].y - track_points[0][index].y;
 
-//        std::cout << "(" << move_x << ", " << move_y << "), " << std::flush;
-
         if (std::abs(move_x) < MINIMUM_FEATURE_MOVE || std::abs(move_y) < MINIMUM_FEATURE_MOVE) {
             continue;
         }
+
+//        std::cout << "(" << move_x << ", " << move_y << "), " << std::flush;
 
         sum_move_x += move_x;
         sum_move_y += move_y;
         count++;
     }
-    std::cout << count << " / " << lk_status.size() << std::endl;
+//    std::cout << count << " / " << lk_status.size() << std::endl;
+//    std::cout << std::endl;
     if (0 < count) {
         ave_move_x = sum_move_x / count;
         ave_move_y = sum_move_y / count;
@@ -57,11 +58,12 @@ void TrackingPerson::MoveRect()
         move_x = 0;
         move_y = 0;
     }
-
+    std::cout << bounding_rect[0] << " > " << std::flush;
     bounding_rect[1].x = cvRound(bounding_rect[0].x + move_x);
     bounding_rect[1].y = cvRound(bounding_rect[0].y + move_y);
     bounding_rect[1].width = bounding_rect[0].width;
     bounding_rect[1].height = bounding_rect[0].height;
+    std::cout << bounding_rect[1] << std::endl;
 }
 
 void TrackingPerson::OverwriteLog()
