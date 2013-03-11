@@ -24,11 +24,13 @@ public:
     {
         cv::VideoCapture capture("Resources/768x576.avi");
         cv::Mat frame;
-        cv::Mat gray_mat;
         cv::Mat draw_mat;
 
         // i do not know why this is here ref. bgfg_gmg.cpp
         cv::initModule_video();
+
+        ImageHolder image_holder;
+        image_holder.Init();
 
         std::vector<TrackingPerson> tracking_people;
 
@@ -43,12 +45,10 @@ public:
                 break;
             }
 
-            // to gray
-            cv::cvtColor(frame, gray_mat, CV_BGR2GRAY);
-            cv::blur(gray_mat, gray_mat, cv::Size(3, 3));
+            image_holder.Update(frame);
 
-            people_tracker.Track(gray_mat, tracking_people);
-            people_detector.Detect(gray_mat, tracking_people);
+            people_tracker.Track(image_holder, tracking_people);
+            people_detector.Detect(image_holder, tracking_people);
 
             frame.copyTo(draw_mat);
             for (TrackingPerson tracking_person : tracking_people) {

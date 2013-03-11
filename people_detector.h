@@ -7,6 +7,7 @@
 #include <opencv2/video/video.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
 
+#include "image_holder.h"
 #include "tracking_person.h"
 
 class PeopleDetector
@@ -14,12 +15,10 @@ class PeopleDetector
 public:
     PeopleDetector();
     void Init();
-    void Detect(const cv::Mat &frame, std::vector<TrackingPerson> &tracking_people);
+    void Detect(const ImageHolder &image_holder, std::vector<TrackingPerson> &tracking_people);
 
 private:
-    cv::Ptr<cv::BackgroundSubtractorGMG> fgbg_;
     cv::HOGDescriptor hog_;
-    const int MINIMUM_AREA = 300;
     const int GMG_INIT_FRAME_NUM = 20;
     const double GMG_THRESHOLD = 0.7;
 
@@ -31,6 +30,9 @@ private:
     const int FEATURE_MINIMUM_DISTANCE = 1;
 
     const double OVERLAP_THRESHOLD = 0.5;
+
+    const int TERMCRIT_MAX_COUNT = 20;
+    const double TERMCRIT_EPSILON = 0.3;
 
     void ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame);
     cv::Mat ResizeFrameForHoG(const cv::Mat &image, cv::Rect &rect);

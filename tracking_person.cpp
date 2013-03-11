@@ -38,7 +38,7 @@ void TrackingPerson::MoveRect()
         move_x = track_points[1][index].x - track_points[0][index].x;
         move_y = track_points[1][index].y - track_points[0][index].y;
 
-        std::cout << "(" << move_x << ", " << move_y << "), " << std::flush;
+//        std::cout << "(" << move_x << ", " << move_y << "), " << std::flush;
 
         if (std::abs(move_x) < MINIMUM_FEATURE_MOVE || std::abs(move_y) < MINIMUM_FEATURE_MOVE) {
             continue;
@@ -48,7 +48,7 @@ void TrackingPerson::MoveRect()
         sum_move_y += move_y;
         count++;
     }
-    std::cout << std::endl;
+    std::cout << count << " / " << lk_status.size() << std::endl;
     if (0 < count) {
         ave_move_x = sum_move_x / count;
         ave_move_y = sum_move_y / count;

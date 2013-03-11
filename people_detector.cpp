@@ -11,59 +11,30 @@ PeopleDetector::PeopleDetector()
 
 void PeopleDetector::Init()
 {
-    // prepare for background substraction, ref. bgfg_gmg.cpp
-    fgbg_ = cv::Algorithm::create<cv::BackgroundSubtractorGMG>("BackgroundSubtractor.GMG");
-    if (fgbg_.empty()) {
-        std::cerr << "Failed to create BackgroundSubtractor.GMG Algorithm." << std::endl;
-        return;
-    }
-    // TODO: maybe need to tune these parameters
-    fgbg_->set("initializationFrames", GMG_INIT_FRAME_NUM);
-    fgbg_->set("decisionThreshold", GMG_THRESHOLD);
-
-    // HoG
+    // prepare hog
     hog_.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
 }
 
-void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &tracking_people)
+void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<TrackingPerson> &tracking_people)
 {
-    cv::Mat fgmask;
     cv::Mat roi_mat;
     // normalized mat for good features to track
     cv::Mat normalized;
 
-    // diff and labeled rect
-    cv::Rect roi_rect;
     // HoGed rects
     std::vector<cv::Rect> person_rects;
 
     cv::Rect intersect_rect;
 
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
-    std::vector<cv::Point> contours_poly;
+    cv::Mat unsharp_mask = (cv::Mat_<double>(3, 3) <<
+                            -1.0 / 9, -1.0 / 9, -1.0 / 9,
+                            -1.0 / 9, 17.0 / 9, -1.0 / 9,
+                            -1.0 / 9, -1.0 / 9, -1.0 / 9);
 
-    (*fgbg_)(frame, fgmask);
-    cv::erode(fgmask, fgmask, cv::Mat());
-    cv::dilate(fgmask, fgmask, cv::Mat());
-    cv::dilate(fgmask, fgmask, cv::Mat());
-    cv::erode(fgmask, fgmask, cv::Mat());
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON);
 
-    cv::Mat unsharp_mask = (cv::Mat_<double>(3, 3) << -1.0 / 9, -1.0 / 9, -1.0 / 9,
-                                                      -1.0 / 9, 17.0 / 9, -1.0 / 9,
-                                                      -1.0 / 9, -1.0 / 9, -1.0 / 9);
-
-    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
-
-    cv::findContours(fgmask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    for (std::vector<cv::Point> contour : contours) {
-        if (cv::contourArea(contour) < MINIMUM_AREA) {
-            continue;
-        }
-        cv::approxPolyDP(cv::Mat(contour), contours_poly, cv::arcLength(cv::Mat(contour), true) * 0.02, true);
-        roi_rect = cv::boundingRect(cv::Mat(contours_poly));
-
-        roi_mat = ResizeFrameForHoG(frame, roi_rect);
+    for (cv::Rect roi_rect : image_holder.diff_rects) {
+        roi_mat = ResizeFrameForHoG(image_holder.gray, roi_rect);
         cv::filter2D(roi_mat, roi_mat, -1, unsharp_mask);
 
         hog_.detectMultiScale(roi_mat, person_rects);
@@ -84,7 +55,7 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
                 continue;
             }
 
-            normalized = frame(person_rect);
+            normalized = image_holder.gray(person_rect);
             cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
 
             TrackingPerson tracking_person;
@@ -92,9 +63,9 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
             tracking_person.missing_count = 0;
             cv::goodFeaturesToTrack(normalized,
                                     tracking_person.track_points[0],
-                                    FEATURE_MAXIMUM_NUM,
-                                    FEATURE_QUALITY,
-                                    FEATURE_MINIMUM_DISTANCE);
+                    FEATURE_MAXIMUM_NUM,
+                    FEATURE_QUALITY,
+                    FEATURE_MINIMUM_DISTANCE);
             cv::cornerSubPix(normalized, tracking_person.track_points[0], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_PREV);
             tracking_people.push_back(tracking_person);

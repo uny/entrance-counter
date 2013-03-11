@@ -9,23 +9,24 @@ PeopleTracker::PeopleTracker()
 {
 }
 
-void PeopleTracker::Track(const cv::Mat &frame, std::vector<TrackingPerson> &tracking_people)
+void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingPerson> &tracking_people)
 {
     std::vector<float> lk_error;
     cv::Rect larger_rect;
+    std::vector<uchar> reverse_lk_status;
 
-    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON);
 
     // change track method to fast
     for (int index = 0; index < (int)tracking_people.size(); index++) {
         if (!tracking_people[index].track_points[0].empty()) {
             if (prev_frame_.empty()) {
-                frame.copyTo(prev_frame_);
+                image_holder.gray.copyTo(prev_frame_);
             }
-            larger_rect = tracking_people[index].ExpandRectToTrack(frame.size());
+            larger_rect = tracking_people[index].ExpandRectToTrack(image_holder.gray.size());
             tracking_people[index].JustifyFeaturesPoint(larger_rect.tl(), cv::Point(0, 0), tracking_people[index].TP_JUSTIFY_PREV);
             cv::calcOpticalFlowPyrLK(prev_frame_(larger_rect),
-                                     frame(larger_rect),
+                                     image_holder.gray(larger_rect),
                                      tracking_people[index].track_points[0],
                                      tracking_people[index].track_points[1],
                                      tracking_people[index].lk_status,
@@ -49,5 +50,5 @@ void PeopleTracker::Track(const cv::Mat &frame, std::vector<TrackingPerson> &tra
         }
     }
 
-    frame.copyTo(prev_frame_);
+    image_holder.gray.copyTo(prev_frame_);
 }
