@@ -5,6 +5,7 @@
 #include <opencv2/video/video.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "image_holder.h"
 #include "tracking_person.h"
 #include "people_detector.h"
 #include "people_tracker.h"

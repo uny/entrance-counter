@@ -9,7 +9,7 @@ class ImageHolder
 public:
     cv::Mat color;
     cv::Mat gray;
-    cv::Mat diff;
+    cv::Mat diff_mask;
 
     ImageHolder();
     void Init();

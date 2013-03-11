@@ -29,6 +29,8 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
 {
     cv::Mat fgmask;
     cv::Mat roi_mat;
+    // normalized mat for good features to track
+    cv::Mat normalized;
 
     // diff and labeled rect
     cv::Rect roi_rect;
@@ -70,10 +72,9 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
             JustifyPersonRect(person_rect, roi_rect);
 
             bool overlapped = false;
-            for (int index = 0; index < tracking_people.size(); index++) {
+            for (int index = 0; index < (int)tracking_people.size(); index++) {
                 intersect_rect = person_rect & tracking_people[index].bounding_rect[1];
                 if (roi_rect.area() * OVERLAP_THRESHOLD < intersect_rect.area()) {
-//                    std::cout << "interset: " << intersect_rect << std::endl;
                     tracking_people[index].bounding_rect[1] = person_rect;
                     overlapped = true;
                     break;
@@ -83,15 +84,18 @@ void PeopleDetector::Detect(const cv::Mat &frame, std::vector<TrackingPerson> &t
                 continue;
             }
 
+            normalized = frame(person_rect);
+            cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
+
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[0] = person_rect;
             tracking_person.missing_count = 0;
-            cv::goodFeaturesToTrack(frame(person_rect),
+            cv::goodFeaturesToTrack(normalized,
                                     tracking_person.track_points[0],
                                     FEATURE_MAXIMUM_NUM,
                                     FEATURE_QUALITY,
                                     FEATURE_MINIMUM_DISTANCE);
-            cv::cornerSubPix(frame(person_rect), tracking_person.track_points[0], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
+            cv::cornerSubPix(normalized, tracking_person.track_points[0], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_PREV);
             tracking_people.push_back(tracking_person);
         }
@@ -130,10 +134,4 @@ void PeopleDetector::JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect)
 
     rect.x += roi_rect.x;
     rect.y += roi_rect.y;
-}
-
-void PeopleDetector::JustifyFeaturePoint(cv::Point &point, const cv::Rect &roi_rect)
-{
-    point.x += roi_rect.x;
-    point.y += roi_rect.y;
 }

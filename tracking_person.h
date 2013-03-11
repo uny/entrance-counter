@@ -26,8 +26,14 @@ public:
                               TP_JUSTIFY_ENUM select);
     void MoveRect();
     void OverwriteLog();
+    // wide rectangle of interest for tracking
+    cv::Rect ExpandRectToTrack(cv::Size frame_size);
 
 private:
+    // margin of roi for tracking
+    const int MARGIN_WIDTH = 50;
+    const int MINIMUM_FEATURE_MOVE = 1;
+
     void JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features,
                                       const cv::Point &from_point,
                                       const cv::Point &to_point);

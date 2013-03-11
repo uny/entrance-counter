@@ -30,12 +30,11 @@ private:
     const double FEATURE_QUALITY = 0.01;
     const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    const double OVERLAP_THRESHOLD = 0.2;
+    const double OVERLAP_THRESHOLD = 0.5;
 
     void ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame);
     cv::Mat ResizeFrameForHoG(const cv::Mat &image, cv::Rect &rect);
     void JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect);
-    void JustifyFeaturePoint(cv::Point &point, const cv::Rect &roi_rect);
 };
 
 #endif // PEOPLE_DETECTOR_H
