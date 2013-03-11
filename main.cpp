@@ -24,9 +24,10 @@ public:
     {
         cv::VideoCapture capture("Resources/768x576.avi");
         cv::Mat frame;
+        // for debug
         cv::Mat draw_mat;
 
-        // i do not know why this is here ref. bgfg_gmg.cpp
+        // i do not know why this is here, ref. bgfg_gmg.cpp
         cv::initModule_video();
 
         ImageHolder image_holder;
@@ -45,23 +46,25 @@ public:
                 break;
             }
 
+            // image_holder has color, gray, diff images
             image_holder.Update(frame);
 
+            // move rects of people with lucas-kanade optical flow
             people_tracker.Track(image_holder, tracking_people);
+            // add new people to tracking_people
             people_detector.Detect(image_holder, tracking_people);
 
             frame.copyTo(draw_mat);
-            for (TrackingPerson tracking_person : tracking_people) {
-                cv::rectangle(draw_mat, tracking_person.bounding_rect[1], cv::Scalar(0, 255, 0), 3);
-                for (int i = 0; i < (int)tracking_person.lk_status.size(); i++) {
-//                    if (!tracking_person.lk_status[i]) {
-//                        std::cout << "error" << std::endl;
-//                        continue;
-//                    }
-//                    std::cout << tracking_person.track_points[1][i] << std::endl;
-                    cv::circle(draw_mat, tracking_person.track_points[1][i], 1, cv::Scalar(255, 0, 0), 3);
+            for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
+                cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
+                for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
+                    std::cout << tracking_people[p_index].track_points[0].size() << ", " << tracking_people[p_index].track_points[1].size() << std::endl;
+                    if (tracking_people[p_index].track_points[0].size() != tracking_people[p_index].track_points[1].size()) {
+                        break;
+                    }
+                    cv::line(draw_mat, tracking_people[p_index].track_points[0][f_index], tracking_people[p_index].track_points[1][f_index], cv::Scalar(0, 0, 255), 2);
                 }
-                tracking_person.OverwriteLog();
+                tracking_people[p_index].OverwriteLog();
             }
 
             cv::imshow("debug", draw_mat);

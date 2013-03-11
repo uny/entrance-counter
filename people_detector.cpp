@@ -43,10 +43,10 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             JustifyPersonRect(person_rect, roi_rect);
 
             bool overlapped = false;
-            for (int index = 0; index < (int)tracking_people.size(); index++) {
-                intersect_rect = person_rect & tracking_people[index].bounding_rect[1];
+            for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
+                intersect_rect = person_rect & tracking_people[p_index].bounding_rect[1];
                 if (roi_rect.area() * OVERLAP_THRESHOLD < intersect_rect.area()) {
-                    tracking_people[index].bounding_rect[1] = person_rect;
+                    tracking_people[p_index].bounding_rect[1] = person_rect;
                     overlapped = true;
                     break;
                 }
@@ -59,15 +59,17 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
 
             TrackingPerson tracking_person;
-            tracking_person.bounding_rect[0] = person_rect;
+            tracking_person.bounding_rect[1] = person_rect;
             tracking_person.missing_count = 0;
             cv::goodFeaturesToTrack(normalized,
-                                    tracking_person.track_points[0],
-                    FEATURE_MAXIMUM_NUM,
-                    FEATURE_QUALITY,
-                    FEATURE_MINIMUM_DISTANCE);
-            cv::cornerSubPix(normalized, tracking_person.track_points[0], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
-            tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_PREV);
+                                    tracking_person.track_points[1],
+                                    FEATURE_MAXIMUM_NUM,
+                                    FEATURE_QUALITY,
+                                    FEATURE_MINIMUM_DISTANCE);
+            cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
+            // all features are valid, so should set lk_status all true (1)
+            tracking_person.lk_status = std::vector<uchar>(tracking_person.track_points[1].size(), 1);
+            tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_NEXT);
             tracking_people.push_back(tracking_person);
         }
     }

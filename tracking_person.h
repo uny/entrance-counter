@@ -11,7 +11,7 @@ public:
     std::vector<cv::Point2f> track_points[2];
     cv::Rect bounding_rect[2];
     int missing_count;
-    std::vector<uchar> lk_status;
+    std::vector<uchar> lk_status = std::vector<uchar>();
     std::vector<cv::Point> centers;
 
     typedef enum {

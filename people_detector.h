@@ -19,8 +19,6 @@ public:
 
 private:
     cv::HOGDescriptor hog_;
-    const int GMG_INIT_FRAME_NUM = 20;
-    const double GMG_THRESHOLD = 0.7;
 
     const int HOG_MARGIN_WIDTH = 15;
     const int HOG_IMAGE_WIDTH = 72;
@@ -29,7 +27,7 @@ private:
     const double FEATURE_QUALITY = 0.01;
     const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    const double OVERLAP_THRESHOLD = 0.5;
+    const double OVERLAP_THRESHOLD = 0.3;
 
     const int TERMCRIT_MAX_COUNT = 20;
     const double TERMCRIT_EPSILON = 0.3;
