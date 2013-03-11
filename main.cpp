@@ -58,7 +58,6 @@ public:
             for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
                 cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
                 for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
-                    std::cout << tracking_people[p_index].track_points[0].size() << ", " << tracking_people[p_index].track_points[1].size() << std::endl;
                     if (tracking_people[p_index].track_points[0].size() != tracking_people[p_index].track_points[1].size()) {
                         break;
                     }

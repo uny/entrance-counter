@@ -24,8 +24,6 @@ private:
     const double FEATURE_QUALITY = 0.01;
     const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    const double TRACK_MINIMUM_NORM = 5.0;
-
     void JustifyNextFeaturesPoint(std::vector<cv::Point2f> features);
 };
 
