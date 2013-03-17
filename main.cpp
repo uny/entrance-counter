@@ -60,6 +60,13 @@ public:
 
             frame.copyTo(draw_mat);
             for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
+                // TODO: test, rects are not drawn but exists in the data
+                if (tracking_people[p_index].missing_count) {
+                    continue;
+                }
+                if (!tracking_people[p_index].track_points[1].size()) {
+                    continue;
+                }
                 cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
                 int cur_index = 0;
                 for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
