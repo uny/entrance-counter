@@ -70,7 +70,13 @@ void TrackingPerson::OverwriteLog()
         if (!lk_status[index]) {
             continue;
         }
+        if (!track_points[1][index].inside(bounding_rect[1])) {
+            continue;
+        }
         tmp_points.push_back(track_points[1][index]);
+    }
+    if (lk_status.size() != tmp_points.size()) {
+        std::cout << lk_status.size() << " > " << tmp_points.size() << std::endl;
     }
     track_points[0].swap(tmp_points);
 }

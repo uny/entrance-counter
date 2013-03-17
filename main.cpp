@@ -40,7 +40,11 @@ public:
 
         PeopleTracker people_tracker;
 
+//        int64 start_time;
+
         while (true) {
+//            start_time = cv::getTickCount();
+
             capture >> frame;
             if (frame.empty()) {
                 break;
@@ -57,18 +61,22 @@ public:
             frame.copyTo(draw_mat);
             for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
                 cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
+                int cur_index = 0;
                 for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
-                    if (tracking_people[p_index].track_points[0].size() != tracking_people[p_index].track_points[1].size()) {
-                        break;
+                    if (!tracking_people[p_index].lk_status[f_index] || tracking_people[p_index].track_points[0].empty()) {
+                        continue;
                     }
-                    cv::line(draw_mat, tracking_people[p_index].track_points[0][f_index], tracking_people[p_index].track_points[1][f_index], cv::Scalar(0, 0, 255), 2);
+                    cv::line(draw_mat, tracking_people[p_index].track_points[0][f_index], tracking_people[p_index].track_points[1][cur_index], cv::Scalar(0, 0, 255), 2);
+                    cur_index++;
                 }
                 tracking_people[p_index].OverwriteLog();
             }
 
             cv::imshow("debug", draw_mat);
 
-            if (0 < cvWaitKey(30)) {
+//            std::cout << (cv::getTickCount() - start_time) / cv::getTickFrequency() * 1000 << std::endl;
+
+            if (0 < cvWaitKey(1)) {
                 break;
             }
         }

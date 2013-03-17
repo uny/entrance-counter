@@ -21,6 +21,8 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
 
     // person index for loop
     int p_index = 0;
+    // feature index for loop
+    int f_index = 0;
 
     // change track method to fast
     for (p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
@@ -36,6 +38,18 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
                                      tracking_people[p_index].track_points[1],
                                      tracking_people[p_index].lk_status,
                                      lk_error);
+            cv::calcOpticalFlowPyrLK(gray(larger_rect),
+                                     prev_frame_(larger_rect),
+                                     tracking_people[p_index].track_points[1],
+                                     reverse_track_points,
+                                     reverse_lk_status,
+                                     lk_error);
+
+            for (f_index = 0; f_index < (int)reverse_lk_status.size(); f_index++) {
+                if (!reverse_lk_status[f_index]) {
+                    tracking_people[p_index].lk_status[f_index] = 0;
+                }
+            }
 
             tracking_people[p_index].JustifyFeaturesPoint(cv::Point(0, 0), larger_rect.tl(), tracking_people[p_index].TP_JUSTIFY_BOTH);
             tracking_people[p_index].MoveRect();
@@ -43,4 +57,9 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
     }
 
     gray.copyTo(prev_frame_);
+}
+
+void PeopleTracker::ThinOutFeatures(std::vector<cv::Point2f> &features, const std::vector<uchar> &status)
+{
+
 }

@@ -8,6 +8,11 @@
 class TrackingPerson
 {
 public:
+    /**
+     * @brief track_points
+     * 0: previous tracking points
+     * 1: current tracking points
+     */
     std::vector<cv::Point2f> track_points[2];
     cv::Rect bounding_rect[2];
     int missing_count;
