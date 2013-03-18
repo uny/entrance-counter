@@ -18,7 +18,7 @@ private:
     static const int MAX_FEATURE_NUM = 500;
 
     // TODO: tune this parameter
-    static const int MAXIMUM_MISS_COUNT = 1;
+    static const int MAXIMUM_MISS_COUNT = 0;
 
     static const int FEATURE_MAXIMUM_NUM = 500;
     static const double FEATURE_QUALITY = 0.01;

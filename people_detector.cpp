@@ -62,6 +62,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
             tracking_person.missing_count = 0;
+            // change to FAST
             cv::goodFeaturesToTrack(normalized,
                                     tracking_person.track_points[TP_TRANSITION_NEXT],
                                     FEATURE_MAXIMUM_NUM,

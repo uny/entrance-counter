@@ -55,8 +55,8 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
         p_iter->JustifyFeaturesPoint(cv::Point(0, 0), larger_rect.tl(), TP_TRANSITION_BOTH);
         p_iter->MoveRect();
 
-        if (p_iter->missing_count < MAXIMUM_MISS_COUNT) {
-            p_iter = tracking_people.erase(tracking_people.begin());
+        if (MAXIMUM_MISS_COUNT < p_iter->missing_count) {
+            p_iter = tracking_people.erase(p_iter);
             continue;
         }
         ++p_iter;
