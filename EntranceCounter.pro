@@ -6,7 +6,7 @@ CONFIG -= qt
 QMAKE_CXXFLAGS -= -mmacosx-version-min=10.6
 QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
 QMAKE_LFLAGS -= -mmacosx-version-min=10.6
-QMAKE_LFLAGS += -std=c++11 -stdlib=libc++
+QMAKE_LFLAGS += -stdlib=libc++
 
 SOURCES += main.cpp \
     tracking_person.cpp \

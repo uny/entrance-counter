@@ -25,7 +25,7 @@ void ImageHolder::Update(const cv::Mat &frame)
 {
     cv::Mat fgmask;
 
-    std::vector<std::vector<cv::Point>> contours;
+    std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     std::vector<cv::Point> contour_poly;
     cv::Rect roi_rect;

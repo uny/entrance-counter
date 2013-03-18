@@ -19,44 +19,47 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
     std::vector<uchar> reverse_lk_status;
     std::vector<cv::Point2f> reverse_track_points;
 
-    // person index for loop
-    int p_index = 0;
+    // person iterator
+    std::vector<TrackingPerson>::iterator p_iter = tracking_people.begin();
     // feature index for loop
     int f_index = 0;
 
-    // change track method to fast
-    for (p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
+    while (p_iter != tracking_people.end()) {
         // when first
         if (prev_frame_.empty()) {
             gray.copyTo(prev_frame_);
         }
-        larger_rect = tracking_people[p_index].ExpandRectToTrack(gray.size());
-        tracking_people[p_index].JustifyFeaturesPoint(larger_rect.tl(), cv::Point(0, 0), TP_TRANSITION_PREV);
+        larger_rect = p_iter->ExpandRectToTrack(gray.size());
+        // set features points in the bounding rect
+        p_iter->JustifyFeaturesPoint(larger_rect.tl(), cv::Point(0, 0), TP_TRANSITION_PREV);
         cv::calcOpticalFlowPyrLK(prev_frame_(larger_rect),
                                  gray(larger_rect),
-                                 tracking_people[p_index].track_points[0],
-                tracking_people[p_index].track_points[1],
-                tracking_people[p_index].lk_status,
-                lk_error);
+                                 p_iter->track_points[0],
+                                 p_iter->track_points[1],
+                                 p_iter->lk_status,
+                                 lk_error);
+        // check by reverse
         cv::calcOpticalFlowPyrLK(gray(larger_rect),
                                  prev_frame_(larger_rect),
-                                 tracking_people[p_index].track_points[1],
-                reverse_track_points,
-                reverse_lk_status,
-                lk_error);
-
+                                 p_iter->track_points[1],
+                                 reverse_track_points,
+                                 reverse_lk_status,
+                                 lk_error);
+        // if reverse check is error, see it as an error
         for (f_index = 0; f_index < (int)reverse_lk_status.size(); f_index++) {
             if (!reverse_lk_status[f_index]) {
-                tracking_people[p_index].lk_status[f_index] = 0;
+                p_iter->lk_status[f_index] = 0;
             }
         }
+        // reset features points for the whole image
+        p_iter->JustifyFeaturesPoint(cv::Point(0, 0), larger_rect.tl(), TP_TRANSITION_BOTH);
+        p_iter->MoveRect();
 
-        tracking_people[p_index].JustifyFeaturesPoint(cv::Point(0, 0), larger_rect.tl(), TP_TRANSITION_BOTH);
-        tracking_people[p_index].MoveRect();
-
-        if (tracking_people[p_index].missing_count) {
-
+        if (p_iter->missing_count < MAXIMUM_MISS_COUNT) {
+            p_iter = tracking_people.erase(tracking_people.begin());
+            continue;
         }
+        ++p_iter;
     }
 
     // TODO: it should be clone ? or copyTo?

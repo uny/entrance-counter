@@ -17,8 +17,8 @@ private:
 
     const int MAX_FEATURE_NUM = 500;
 
-    const int MISS_THRESHOLD = 10;
-    const int REPLOT_THRESHOLD = 100;
+    // TODO: tune this parameter
+    const int MAXIMUM_MISS_COUNT = 1;
 
     const int FEATURE_MAXIMUM_NUM = 500;
     const double FEATURE_QUALITY = 0.01;
