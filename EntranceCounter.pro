@@ -3,10 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS -= -mmacosx-version-min=10.6
-QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
-QMAKE_LFLAGS -= -mmacosx-version-min=10.6
-QMAKE_LFLAGS += -stdlib=libc++
+QMAKE_LFLAGS += -Wc++11-extensions -Wgnu
 
 SOURCES += main.cpp \
     tracking_person.cpp \

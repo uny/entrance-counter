@@ -4,6 +4,7 @@
 
 TrackingPerson::TrackingPerson()
 {
+    lk_status = std::vector<uchar>();
 }
 
 void TrackingPerson::JustifyFeaturesPoint(const cv::Point &from_point, const cv::Point &to_point, TP_TRANSITION_ENUM select)

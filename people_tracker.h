@@ -15,14 +15,14 @@ public:
 private:
     cv::Mat prev_frame_;
 
-    const int MAX_FEATURE_NUM = 500;
+    static const int MAX_FEATURE_NUM = 500;
 
     // TODO: tune this parameter
-    const int MAXIMUM_MISS_COUNT = 1;
+    static const int MAXIMUM_MISS_COUNT = 1;
 
-    const int FEATURE_MAXIMUM_NUM = 500;
-    const double FEATURE_QUALITY = 0.01;
-    const int FEATURE_MINIMUM_DISTANCE = 1;
+    static const int FEATURE_MAXIMUM_NUM = 500;
+    static const double FEATURE_QUALITY = 0.01;
+    static const int FEATURE_MINIMUM_DISTANCE = 1;
 };
 
 #endif // PEOPLE_TRACKER_H

@@ -30,7 +30,7 @@ public:
     cv::Rect bounding_rect[2];
     int missing_count;
     cv::FastFeatureDetector detector;
-    std::vector<uchar> lk_status = std::vector<uchar>();
+    std::vector<uchar> lk_status;
     std::vector<cv::Point> centers;
 
     TrackingPerson();
@@ -49,9 +49,9 @@ public:
 
 private:
     // margin of roi for tracking
-    const int MARGIN_WIDTH = 50;
-    const int MINIMUM_FEATURE_MOVE = 1;
-    const double MINIMUM_TRACK_CONFIDENCE = 0.8;
+    static const int MARGIN_WIDTH = 50;
+    static const int MINIMUM_FEATURE_MOVE = 1;
+    static const double MINIMUM_TRACK_CONFIDENCE = 0.8;
 
     void JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features,
                                       const cv::Point &from_point,

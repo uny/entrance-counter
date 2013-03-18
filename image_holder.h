@@ -18,9 +18,9 @@ public:
 private:
     cv::Ptr<cv::BackgroundSubtractorGMG> fgbg_;
 
-    const int MINIMUM_AREA = 300;
-    const int GMG_INIT_FRAME_NUM = 20;
-    const double GMG_THRESHOLD = 0.7;
+    static const int MINIMUM_AREA = 300;
+    static const int GMG_INIT_FRAME_NUM = 20;
+    static const double GMG_THRESHOLD = 0.7;
 };
 
 #endif // IMAGE_HOLDER_H
