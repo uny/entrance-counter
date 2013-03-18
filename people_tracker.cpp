@@ -32,6 +32,7 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
         larger_rect = p_iter->ExpandRectToTrack(gray.size());
         // set features points in the bounding rect
         p_iter->JustifyFeaturesPoint(larger_rect.tl(), cv::Point(0, 0), TP_TRANSITION_PREV);
+        // TODO: abort
         cv::calcOpticalFlowPyrLK(prev_frame_(larger_rect),
                                  gray(larger_rect),
                                  p_iter->track_points[0],
