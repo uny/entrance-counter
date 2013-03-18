@@ -27,7 +27,7 @@ private:
     const double FEATURE_QUALITY = 0.01;
     const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    const double OVERLAP_THRESHOLD = 0.3;
+    const double OVERLAP_THRESHOLD = 0.1;
 
     const int TERMCRIT_MAX_COUNT = 20;
     const double TERMCRIT_EPSILON = 0.3;

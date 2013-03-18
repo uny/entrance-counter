@@ -23,8 +23,6 @@ private:
     const int FEATURE_MAXIMUM_NUM = 500;
     const double FEATURE_QUALITY = 0.01;
     const int FEATURE_MINIMUM_DISTANCE = 1;
-
-    void ThinOutFeatures(std::vector<cv::Point2f> &features, const std::vector<uchar> &status);
 };
 
 #endif // PEOPLE_TRACKER_H

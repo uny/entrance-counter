@@ -19,7 +19,8 @@ unix: LIBS += -L/usr/opencv/lib/\
 -lopencv_highgui\
 -lopencv_video\
 -lopencv_imgproc\
--lopencv_objdetect
+-lopencv_objdetect\
+-lopencv_features2d
 
 INCLUDEPATH += /usr/opencv/include
 DEPENDPATH += /usr/opencv/include

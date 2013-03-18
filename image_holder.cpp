@@ -44,7 +44,7 @@ void ImageHolder::Update(const cv::Mat &frame)
 
     diff_rects.clear();
     cv::findContours(fgmask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    for (std::vector<cv::Point> contour : contours) {
+    for (const std::vector<cv::Point> &contour : contours) {
         if (cv::contourArea(contour) < MINIMUM_AREA) {
             continue;
         }

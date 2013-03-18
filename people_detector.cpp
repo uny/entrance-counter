@@ -37,6 +37,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
         roi_mat = ResizeFrameForHoG(image_holder.gray, roi_rect);
         cv::filter2D(roi_mat, roi_mat, -1, unsharp_mask);
 
+        // TODO: should set parameters
         hog_.detectMultiScale(roi_mat, person_rects);
 
         for (cv::Rect person_rect : person_rects) {
@@ -59,17 +60,16 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
 
             TrackingPerson tracking_person;
-            tracking_person.bounding_rect[1] = person_rect;
+            tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
             tracking_person.missing_count = 0;
             cv::goodFeaturesToTrack(normalized,
-                                    tracking_person.track_points[1],
+                                    tracking_person.track_points[TP_TRANSITION_NEXT],
                                     FEATURE_MAXIMUM_NUM,
                                     FEATURE_QUALITY,
                                     FEATURE_MINIMUM_DISTANCE);
             cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
-            // all features are valid, so should set lk_status all true (1)
-            tracking_person.lk_status = std::vector<uchar>(tracking_person.track_points[1].size(), 1);
-            tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), tracking_person.TP_JUSTIFY_NEXT);
+            tracking_person.InitializeForDetection();
+            tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);
             tracking_people.push_back(tracking_person);
         }
     }

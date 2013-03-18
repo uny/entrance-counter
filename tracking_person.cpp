@@ -6,13 +6,13 @@ TrackingPerson::TrackingPerson()
 {
 }
 
-void TrackingPerson::JustifyFeaturesPoint(const cv::Point &from_point, const cv::Point &to_point, TP_JUSTIFY_ENUM select)
+void TrackingPerson::JustifyFeaturesPoint(const cv::Point &from_point, const cv::Point &to_point, TP_TRANSITION_ENUM select)
 {
-    if (select == TP_JUSTIFY_BOTH || select == TP_JUSTIFY_PREV) {
-        JustifySelectedFeaturesPoint(track_points[0], from_point, to_point);
+    if (select == TP_TRANSITION_BOTH || select == TP_TRANSITION_PREV) {
+        JustifySelectedFeaturesPoint(track_points[TP_TRANSITION_PREV], from_point, to_point);
     }
-    if (select == TP_JUSTIFY_BOTH || select == TP_JUSTIFY_NEXT) {
-        JustifySelectedFeaturesPoint(track_points[1], from_point, to_point);
+    if (select == TP_TRANSITION_BOTH || select == TP_TRANSITION_NEXT) {
+        JustifySelectedFeaturesPoint(track_points[TP_TRANSITION_NEXT], from_point, to_point);
     }
 }
 
@@ -31,12 +31,12 @@ void TrackingPerson::MoveRect()
     int ave_move_y;
 
 
-    for (index = 0; index < (int)track_points[0].size(); index++) {
+    for (index = 0; index < (int)track_points[TP_TRANSITION_PREV].size(); index++) {
         if (!lk_status[index]) {
             continue;
         }
-        move_x = track_points[1][index].x - track_points[0][index].x;
-        move_y = track_points[1][index].y - track_points[0][index].y;
+        move_x = track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
+        move_y = track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
 
         if (std::abs(move_x) < MINIMUM_FEATURE_MOVE || std::abs(move_y) < MINIMUM_FEATURE_MOVE) {
             continue;
@@ -54,31 +54,48 @@ void TrackingPerson::MoveRect()
         move_x = 0;
         move_y = 0;
     }
-    bounding_rect[1].x = cvRound(bounding_rect[0].x + move_x);
-    bounding_rect[1].y = cvRound(bounding_rect[0].y + move_y);
-    bounding_rect[1].width = bounding_rect[0].width;
-    bounding_rect[1].height = bounding_rect[0].height;
+    bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + move_x);
+    bounding_rect[TP_TRANSITION_NEXT].y = cvRound(bounding_rect[TP_TRANSITION_PREV].y + move_y);
+    bounding_rect[TP_TRANSITION_NEXT].width = bounding_rect[TP_TRANSITION_PREV].width;
+    bounding_rect[TP_TRANSITION_NEXT].height = bounding_rect[TP_TRANSITION_PREV].height;
 }
 
 void TrackingPerson::OverwriteLog()
 {
-    bounding_rect[0] = bounding_rect[1];
-
     std::vector<cv::Point2f> tmp_points;
 
     for (int index = 0; index < (int)lk_status.size(); index++) {
         if (!lk_status[index]) {
             continue;
         }
-        if (!track_points[1][index].inside(bounding_rect[1])) {
+        if (!track_points[TP_TRANSITION_NEXT][index].inside(bounding_rect[TP_TRANSITION_NEXT])) {
             continue;
         }
-        tmp_points.push_back(track_points[1][index]);
+        tmp_points.push_back(track_points[TP_TRANSITION_NEXT][index]);
     }
+
+    // for debug
     if (lk_status.size() != tmp_points.size()) {
         std::cout << lk_status.size() << " > " << tmp_points.size() << std::endl;
     }
-    track_points[0].swap(tmp_points);
+
+    // update confidence
+    track_confidence *= (double)tmp_points.size() / lk_status.size();
+    std::cout << track_confidence << std::endl;
+    if (track_confidence < MINIMUM_TRACK_CONFIDENCE) {
+        missing_count = 1;
+        return;
+    }
+
+    bounding_rect[TP_TRANSITION_PREV] = bounding_rect[TP_TRANSITION_NEXT];
+    track_points[TP_TRANSITION_PREV].swap(tmp_points);
+}
+
+void TrackingPerson::InitializeForDetection()
+{
+    // all features are valid, so should set lk_status all true (1)
+    lk_status = std::vector<uchar>(track_points[1].size(), 1);
+    track_confidence = 1.0;
 }
 
 void TrackingPerson::JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features, const cv::Point &from_point, const cv::Point &to_point)
@@ -91,7 +108,7 @@ void TrackingPerson::JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &feat
 
 cv::Rect TrackingPerson::ExpandRectToTrack(cv::Size frame_size)
 {
-    cv::Rect rect = bounding_rect[0];
+    cv::Rect rect = bounding_rect[TP_TRANSITION_PREV];
     cv::Rect larger;
     larger.x = std::max(rect.x - MARGIN_WIDTH, 0);
     larger.y = std::max(rect.y - MARGIN_WIDTH, 0);
