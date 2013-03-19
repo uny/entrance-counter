@@ -76,7 +76,7 @@ void TrackingPerson::OverwriteLog()
 
     // update confidence
     track_confidence *= (double)tmp_points.size() / lk_status.size();
-    if (track_confidence < MINIMUM_TRACK_CONFIDENCE) {
+    if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
         missing_count = 1;
         return;
     }

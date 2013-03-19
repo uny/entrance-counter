@@ -19,7 +19,7 @@ void ImageHolder::Init()
     }
     // TODO: maybe need to tune these parameters
     fgbg_->set("initializationFrames", GMG_INIT_FRAME_NUM);
-    fgbg_->set("decisionThreshold", GMG_THRESHOLD);
+    fgbg_->set("decisionThreshold", (GMG_THRESHOLD / 10.0));
 }
 
 void ImageHolder::Update(const cv::Mat &frame)

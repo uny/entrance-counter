@@ -21,7 +21,6 @@ private:
     static const int MAXIMUM_MISS_COUNT = 0;
 
     static const int FEATURE_MAXIMUM_NUM = 500;
-    static const double FEATURE_QUALITY = 0.01;
     static const int FEATURE_MINIMUM_DISTANCE = 1;
 };
 

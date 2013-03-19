@@ -24,15 +24,16 @@ private:
     static const int HOG_IMAGE_WIDTH = 72;
 
     static const int FEATURE_MAXIMUM_NUM = 500;
-    static const double FEATURE_QUALITY = 0.01;
     static const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    static const double OVERLAP_THRESHOLD = 0.1;
+    // will be divided by 10
+    static const int OVERLAP_THRESHOLD = 1;
 
-    static const int FAST_THRESHOLD = 30;
+    static const int FAST_THRESHOLD = 5;
 
     static const int TERMCRIT_MAX_COUNT = 20;
-    static const double TERMCRIT_EPSILON = 0.3;
+    // will be divided by 10
+    static const int TERMCRIT_EPSILON = 3;
 
     void ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame);
     cv::Mat ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &rect);

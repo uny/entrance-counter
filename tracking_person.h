@@ -49,9 +49,10 @@ public:
 
 private:
     // margin of roi for tracking
-    static const int MARGIN_WIDTH = 50;
+    static const int MARGIN_WIDTH = 20;
     static const int MINIMUM_FEATURE_MOVE = 1;
-    static const double MINIMUM_TRACK_CONFIDENCE = 0.8;
+    // will be divided by 10
+    static const int MINIMUM_TRACK_CONFIDENCE = 8;
 
     void JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features,
                                       const cv::Point &from_point,

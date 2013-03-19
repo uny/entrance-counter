@@ -2,9 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
-
-QMAKE_CXXFLAGS += -Wc++11-extensions -Wgnu
-QMAKE_LFLAGS += -Wc++11-extensions -Wgnu
+CONFIG += c++11
 
 SOURCES += main.cpp \
     tracking_person.cpp \

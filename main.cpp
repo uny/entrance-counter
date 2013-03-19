@@ -60,6 +60,7 @@ public:
             // add new people to tracking_people
             people_detector.Detect(image_holder, tracking_people);
 
+            // for debug
             frame.copyTo(draw_mat);
             for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
                 if (!tracking_people[p_index].track_points[1].size()) {
@@ -82,7 +83,7 @@ public:
 
             cv::imshow("debug", draw_mat);
 
-            if (0 < cvWaitKey(1)) {
+            if (cv::waitKey(0) == 'q') {
                 break;
             }
 

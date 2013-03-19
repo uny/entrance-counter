@@ -21,7 +21,8 @@ private:
 
     static const int MINIMUM_AREA = 300;
     static const int GMG_INIT_FRAME_NUM = 20;
-    static const double GMG_THRESHOLD = 0.7;
+    // will be divided by 10
+    static const int GMG_THRESHOLD = 7;
 };
 
 #endif // IMAGE_HOLDER_H

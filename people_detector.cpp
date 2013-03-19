@@ -33,7 +33,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 
     std::vector<cv::KeyPoint> fast_keypoints;
 
-    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON);
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON / 10.0);
 
     for (const cv::Rect &roi_rect : image_holder.diff_rects) {
         roi_mat = ResizeFrameForHoG(image_holder.gray, roi_rect);
@@ -49,7 +49,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             bool overlapped = false;
             for (TrackingPerson &tracking_person : tracking_people) {
                 intersect_rect = person_rect & tracking_person.bounding_rect[1];
-                if (roi_rect.area() * OVERLAP_THRESHOLD < intersect_rect.area()) {
+                if (roi_rect.area() * (OVERLAP_THRESHOLD / 10.0) < intersect_rect.area()) {
                     tracking_person.bounding_rect[1] = person_rect;
                     overlapped = true;
                     break;
@@ -66,13 +66,12 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
             tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
             tracking_person.missing_count = 0;
 
-            cv::FAST(normalized, fast_keypoints, FAST_THRESHOLD);
+            // TODO: fast feature detector
+            // TODO: tune this parameter
+            cv::FastFeatureDetector feature_detector;
+            feature_detector.detect(normalized, fast_keypoints);
+//            cv::FAST(normalized, fast_keypoints, FAST_THRESHOLD);
             cv::KeyPoint::convert(fast_keypoints, tracking_person.track_points[TP_TRANSITION_NEXT]);
-//            cv::goodFeaturesToTrack(normalized,
-//                                    tracking_person.track_points[TP_TRANSITION_NEXT],
-//                                    FEATURE_MAXIMUM_NUM,
-//                                    FEATURE_QUALITY,
-//                                    FEATURE_MINIMUM_DISTANCE);
             // if aborted next line, winSize (third parameter) would be too big
             cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(5, 5), cv::Size(-1, -1), termcrit);
 
@@ -111,6 +110,7 @@ cv::Mat PeopleDetector::ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &
 
 void PeopleDetector::JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect)
 {
+    // TODO: it should be a bit larger
     rect.width *= (double)roi_rect.width / HOG_IMAGE_WIDTH;
     rect.height *= (double)roi_rect.height / (HOG_IMAGE_WIDTH * 2);
 
