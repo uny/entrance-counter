@@ -31,23 +31,26 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                             -1.0 / 9, 17.0 / 9, -1.0 / 9,
                             -1.0 / 9, -1.0 / 9, -1.0 / 9);
 
+    std::vector<cv::KeyPoint> fast_keypoints;
+
     cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON);
 
-    for (cv::Rect roi_rect : image_holder.diff_rects) {
+    for (const cv::Rect &roi_rect : image_holder.diff_rects) {
         roi_mat = ResizeFrameForHoG(image_holder.gray, roi_rect);
         cv::filter2D(roi_mat, roi_mat, -1, unsharp_mask);
 
         // TODO: should set parameters
         hog_.detectMultiScale(roi_mat, person_rects);
 
-        for (cv::Rect person_rect : person_rects) {
+        for (cv::Rect &person_rect : person_rects) {
             JustifyPersonRect(person_rect, roi_rect);
+            // TODO: ?check image should not out of the image
 
             bool overlapped = false;
-            for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
-                intersect_rect = person_rect & tracking_people[p_index].bounding_rect[1];
+            for (TrackingPerson &tracking_person : tracking_people) {
+                intersect_rect = person_rect & tracking_person.bounding_rect[1];
                 if (roi_rect.area() * OVERLAP_THRESHOLD < intersect_rect.area()) {
-                    tracking_people[p_index].bounding_rect[1] = person_rect;
+                    tracking_person.bounding_rect[1] = person_rect;
                     overlapped = true;
                     break;
                 }
@@ -56,19 +59,23 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                 continue;
             }
 
-            normalized = image_holder.gray(person_rect);
+            normalized = image_holder.diff(person_rect);
             cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
 
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
             tracking_person.missing_count = 0;
-            // change to FAST
-            cv::goodFeaturesToTrack(normalized,
-                                    tracking_person.track_points[TP_TRANSITION_NEXT],
-                                    FEATURE_MAXIMUM_NUM,
-                                    FEATURE_QUALITY,
-                                    FEATURE_MINIMUM_DISTANCE);
-            cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(10, 10), cv::Size(-1, -1), termcrit);
+
+            cv::FAST(normalized, fast_keypoints, FAST_THRESHOLD);
+            cv::KeyPoint::convert(fast_keypoints, tracking_person.track_points[TP_TRANSITION_NEXT]);
+//            cv::goodFeaturesToTrack(normalized,
+//                                    tracking_person.track_points[TP_TRANSITION_NEXT],
+//                                    FEATURE_MAXIMUM_NUM,
+//                                    FEATURE_QUALITY,
+//                                    FEATURE_MINIMUM_DISTANCE);
+            // if aborted next line, winSize (third parameter) would be too big
+            cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(5, 5), cv::Size(-1, -1), termcrit);
+
             tracking_person.InitializeForDetection();
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);
             tracking_people.push_back(tracking_person);
@@ -93,10 +100,11 @@ void PeopleDetector::ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame)
     }
 }
 
-cv::Mat PeopleDetector::ResizeFrameForHoG(const cv::Mat &image, cv::Rect &rect)
+cv::Mat PeopleDetector::ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &rect)
 {
-    ExpandRoIRectForHoG(rect, image);
-    cv::Mat resized = image(rect);
+    cv::Rect larger = rect;
+    ExpandRoIRectForHoG(larger, image);
+    cv::Mat resized = image(larger);
     cv::resize(resized, resized, cv::Size(HOG_IMAGE_WIDTH, HOG_IMAGE_WIDTH * 2));
     return resized;
 }

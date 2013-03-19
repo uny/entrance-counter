@@ -9,6 +9,7 @@ class ImageHolder
 public:
     cv::Mat color;
     cv::Mat gray;
+    cv::Mat diff;
     std::vector<cv::Rect> diff_rects;
 
     ImageHolder();

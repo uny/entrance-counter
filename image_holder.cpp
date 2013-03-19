@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 ImageHolder::ImageHolder()
 {
@@ -41,6 +42,9 @@ void ImageHolder::Update(const cv::Mat &frame)
     cv::dilate(fgmask, fgmask, cv::Mat());
     cv::dilate(fgmask, fgmask, cv::Mat());
     cv::erode(fgmask, fgmask, cv::Mat());
+
+    diff = cv::Scalar::all(0);
+    gray.copyTo(diff, fgmask);
 
     diff_rects.clear();
     cv::findContours(fgmask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);

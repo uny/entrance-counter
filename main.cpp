@@ -1,4 +1,6 @@
 #include <iostream>
+// for debug
+#include <sstream>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -64,6 +66,9 @@ public:
                     continue;
                 }
                 cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
+                std::stringstream string_stream;
+                string_stream << p_index;
+                cv::putText(draw_mat, string_stream.str(), tracking_people[p_index].bounding_rect[1].tl(), cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0, 255, 0), 2, CV_AA);
                 int cur_index = 0;
                 for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
                     if (!tracking_people[p_index].lk_status[f_index] || tracking_people[p_index].track_points[0].empty()) {
@@ -77,11 +82,11 @@ public:
 
             cv::imshow("debug", draw_mat);
 
-//            std::cout << (cv::getTickCount() - start_time) / cv::getTickFrequency() * 1000 << std::endl;
-
             if (0 < cvWaitKey(1)) {
                 break;
             }
+
+//            std::cout << (cv::getTickCount() - start_time) / cv::getTickFrequency() * 1000 << std::endl;
         }
     }
 };

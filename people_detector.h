@@ -29,11 +29,13 @@ private:
 
     static const double OVERLAP_THRESHOLD = 0.1;
 
+    static const int FAST_THRESHOLD = 30;
+
     static const int TERMCRIT_MAX_COUNT = 20;
     static const double TERMCRIT_EPSILON = 0.3;
 
     void ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame);
-    cv::Mat ResizeFrameForHoG(const cv::Mat &image, cv::Rect &rect);
+    cv::Mat ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &rect);
     void JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect);
 };
 

@@ -74,14 +74,8 @@ void TrackingPerson::OverwriteLog()
         tmp_points.push_back(track_points[TP_TRANSITION_NEXT][index]);
     }
 
-    // for debug
-    if (lk_status.size() != tmp_points.size()) {
-        std::cout << lk_status.size() << " > " << tmp_points.size() << std::endl;
-    }
-
     // update confidence
     track_confidence *= (double)tmp_points.size() / lk_status.size();
-    std::cout << track_confidence << std::endl;
     if (track_confidence < MINIMUM_TRACK_CONFIDENCE) {
         missing_count = 1;
         return;
