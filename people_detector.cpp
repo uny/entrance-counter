@@ -19,7 +19,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 {
     cv::Mat roi_mat;
     // normalized mat for good features to track
-    cv::Mat normalized;
+    cv::Mat roi_diff;
 
     // HoGed rects
     std::vector<cv::Rect> person_rects;
@@ -31,7 +31,9 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                             -1.0 / 9, 17.0 / 9, -1.0 / 9,
                             -1.0 / 9, -1.0 / 9, -1.0 / 9);
 
+    cv::FastFeatureDetector feature_detector;
     std::vector<cv::KeyPoint> fast_keypoints;
+    cv::FREAK freak;
 
     cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON / 10.0);
 
@@ -59,8 +61,7 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                 continue;
             }
 
-            normalized = image_holder.diff(person_rect);
-            cv::normalize(normalized, normalized, 0, 255, cv::NORM_MINMAX);
+            roi_diff = image_holder.diff(person_rect);
 
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
@@ -68,12 +69,15 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 
             // TODO: fast feature detector
             // TODO: tune this parameter
-            cv::FastFeatureDetector feature_detector;
-            feature_detector.detect(normalized, fast_keypoints);
-//            cv::FAST(normalized, fast_keypoints, FAST_THRESHOLD);
+            feature_detector.detect(roi_diff, fast_keypoints);
             cv::KeyPoint::convert(fast_keypoints, tracking_person.track_points[TP_TRANSITION_NEXT]);
             // if aborted next line, winSize (third parameter) would be too big
-            cv::cornerSubPix(normalized, tracking_person.track_points[1], cv::Size(5, 5), cv::Size(-1, -1), termcrit);
+            cv::cornerSubPix(roi_diff, tracking_person.track_points[1], cv::Size(5, 5), cv::Size(-1, -1), termcrit);
+
+            // set for freak
+            freak.compute(roi_diff, fast_keypoints, tracking_person.descriptors);
+            image_holder.gray(person_rect).copyTo(tracking_person.debug);
+            std::copy(tracking_person.track_points[1].begin(), tracking_person.track_points[1].end(), std::back_inserter(tracking_person.debug_points));
 
             tracking_person.InitializeForDetection();
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);

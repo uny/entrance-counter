@@ -29,9 +29,12 @@ public:
     double track_confidence;
     cv::Rect bounding_rect[2];
     int missing_count;
-    cv::FastFeatureDetector detector;
+    cv::Mat descriptors;
     std::vector<uchar> lk_status;
     std::vector<cv::Point> centers;
+    // for debug
+    cv::Mat debug;
+    std::vector<cv::Point2f> debug_points;
 
     TrackingPerson();
     void JustifyFeaturesPoint(const cv::Point &from_point,
@@ -52,7 +55,7 @@ private:
     static const int MARGIN_WIDTH = 20;
     static const int MINIMUM_FEATURE_MOVE = 1;
     // will be divided by 10
-    static const int MINIMUM_TRACK_CONFIDENCE = 8;
+    static const int MINIMUM_TRACK_CONFIDENCE = 5;
 
     void JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features,
                                       const cv::Point &from_point,

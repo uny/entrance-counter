@@ -83,7 +83,10 @@ public:
 
             cv::imshow("debug", draw_mat);
 
-            if (cv::waitKey(0) == 'q') {
+//            if (cv::waitKey(0) == 'q') {
+//                break;
+//            }
+            if (0 < cv::waitKey(1)) {
                 break;
             }
 
