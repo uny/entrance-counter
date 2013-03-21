@@ -17,6 +17,7 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
 
     std::vector<float> lk_error;
     cv::Rect larger_rect;
+    std::vector<uchar> lk_status;
     std::vector<uchar> reverse_lk_status;
     std::vector<cv::Point2f> reverse_track_points;
 
@@ -38,7 +39,7 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
                                  gray(larger_rect),
                                  p_iter->track_points[0],
                                  p_iter->track_points[1],
-                                 p_iter->lk_status,
+                                 lk_status,
                                  lk_error);
         // check by reverse
         cv::calcOpticalFlowPyrLK(gray(larger_rect),
@@ -48,15 +49,15 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
                                  reverse_lk_status,
                                  lk_error);
         // if reverse check is error, see it as an error
-        for (f_index = 0; f_index < (int)reverse_lk_status.size(); f_index++) {
+        for (f_index = 0; f_index < (int)lk_status.size(); f_index++) {
             if (!reverse_lk_status[f_index]) {
-                p_iter->lk_status[f_index] = 0;
+                lk_status[f_index] = 0;
             }
         }
         // reset features points for the whole image
         p_iter->JustifyFeaturesPoint(cv::Point(0, 0), larger_rect.tl(), TP_TRANSITION_BOTH);
 
-        if (!p_iter->MoveRect()) {
+        if (!p_iter->MoveRect(lk_status)) {
             p_iter = tracking_people.erase(p_iter);
             continue;
         }

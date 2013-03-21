@@ -16,7 +16,7 @@ void TrackingPerson::JustifyFeaturesPoint(const cv::Point &from_point, const cv:
     }
 }
 
-bool TrackingPerson::MoveRect()
+bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
 {
     int sum_move_x = 0;
     int sum_move_y = 0;
@@ -30,17 +30,27 @@ bool TrackingPerson::MoveRect()
     int ave_move_x;
     int ave_move_y;
 
+    std::vector<cv::Point2f>::iterator prev_points_iter = track_points[TP_TRANSITION_PREV].begin();
+    std::vector<cv::Point2f>::iterator next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
+
     // TODO: here, remove uncertain points
-    for (index = 0; index < (int)track_points[TP_TRANSITION_PREV].size(); index++) {
+    while (prev_points_iter != track_points[TP_TRANSITION_PREV].end()
+           || next_points_iter != track_points[TP_TRANSITION_NEXT].end()) {
         if (!lk_status[index]) {
+            prev_points_iter = track_points[TP_TRANSITION_PREV].erase(prev_points_iter);
+            next_points_iter = track_points[TP_TRANSITION_NEXT].erase(next_points_iter);
             continue;
         }
+        // TODO: whether next points are too far
         move_x = track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
         move_y = track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
 
         sum_move_x += move_x;
         sum_move_y += move_y;
         count++;
+
+        ++prev_points_iter;
+        ++next_points_iter;
     }
     if (0 < count) {
         ave_move_x = sum_move_x / count;
@@ -52,10 +62,12 @@ bool TrackingPerson::MoveRect()
     }
 
     // update confidence
+    // TODO: after checking bounding region
     track_confidence *= (double)count / lk_status.size();
     if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
         return false;
     }
+    // TODO: check points are inside rect
 
     bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + move_x);
     bounding_rect[TP_TRANSITION_NEXT].y = cvRound(bounding_rect[TP_TRANSITION_PREV].y + move_y);
@@ -68,7 +80,8 @@ bool TrackingPerson::MoveRect()
 void TrackingPerson::InitializeForDetection()
 {
     // all features are valid, so should set lk_status all true (1)
-    lk_status = std::vector<uchar>(track_points[1].size(), 1);
+    // TODO: remove though unchecked, doutful
+//    lk_status = std::vector<uchar>(track_points[1].size(), 1);
     track_confidence = 1.0;
 }
 
@@ -80,10 +93,10 @@ void TrackingPerson::OverwriteLog(std::vector<TrackingPerson> &tracking_people)
         if (!tracking_person.track_points[TP_TRANSITION_NEXT].size()) {
             continue;
         }
-        for (int index = 0; index < (int)tracking_person.lk_status.size(); index++) {
-            if (!tracking_person.lk_status[index]) {
-                continue;
-            }
+        for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_NEXT].size(); index++) {
+//            if (!tracking_person.lk_status[index]) {
+//                continue;
+//            }
 //            if (!tracking_person.track_points[TP_TRANSITION_NEXT][index].inside(tracking_person.bounding_rect[TP_TRANSITION_NEXT])) {
 //                continue;
 //            }
