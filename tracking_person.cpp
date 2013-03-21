@@ -42,6 +42,7 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
             continue;
         }
         // TODO: whether next points are too far
+        // TODO: sort and take 90% center
         move_x = track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
         move_y = track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
 
@@ -63,6 +64,7 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
 
     // update confidence
     // TODO: after checking bounding region
+    // TODO: add centroid
     track_confidence *= (double)count / lk_status.size();
     if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
         return false;
