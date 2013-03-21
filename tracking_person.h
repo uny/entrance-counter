@@ -28,19 +28,14 @@ public:
      */
     double track_confidence;
     cv::Rect bounding_rect[2];
-    int missing_count;
-    cv::Mat descriptors;
     std::vector<uchar> lk_status;
-    std::vector<cv::Point> centers;
-    // for debug
-    cv::Mat debug;
-    std::vector<cv::Point2f> debug_points;
+    std::vector<cv::Point> centroid;
 
     TrackingPerson();
     void JustifyFeaturesPoint(const cv::Point &from_point,
                               const cv::Point &to_point,
                               TP_TRANSITION_ENUM select);
-    void MoveRect();
+    bool MoveRect();
     void OverwriteLog();
     // wide rectangle of interest for tracking
     cv::Rect ExpandRectToTrack(cv::Size frame_size);

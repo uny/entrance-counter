@@ -6,11 +6,16 @@
 #include "image_holder.h"
 #include "tracking_person.h"
 
+typedef enum {
+    PT_DEBUG_CENTROID,
+} PT_DEBUG_ENUM;
+
 class PeopleTracker
 {
 public:
     PeopleTracker();
     void Track(const ImageHolder &image_holder, std::vector<TrackingPerson> &tracking_people);
+    void DrawForDebug(cv::Mat &drawn, PT_DEBUG_ENUM type);
 
 private:
     cv::Mat prev_frame_;

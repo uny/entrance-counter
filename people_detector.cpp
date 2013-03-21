@@ -65,25 +65,29 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 
             TrackingPerson tracking_person;
             tracking_person.bounding_rect[TP_TRANSITION_NEXT] = person_rect;
-            tracking_person.missing_count = 0;
 
-            // TODO: fast feature detector
             // TODO: tune this parameter
-            feature_detector.detect(roi_diff, fast_keypoints);
-            cv::KeyPoint::convert(fast_keypoints, tracking_person.track_points[TP_TRANSITION_NEXT]);
-            // if aborted next line, winSize (third parameter) would be too big
-            cv::cornerSubPix(roi_diff, tracking_person.track_points[1], cv::Size(5, 5), cv::Size(-1, -1), termcrit);
-
-            // set for freak
-            freak.compute(roi_diff, fast_keypoints, tracking_person.descriptors);
-            image_holder.gray(person_rect).copyTo(tracking_person.debug);
-            std::copy(tracking_person.track_points[1].begin(), tracking_person.track_points[1].end(), std::back_inserter(tracking_person.debug_points));
+            cv::goodFeaturesToTrack(roi_diff,
+                                    tracking_person.track_points[TP_TRANSITION_NEXT],
+                                    FEATURE_MAXIMUM_NUM,
+                                    (FEATURE_QUALITY / 100.0),
+                                    FEATURE_MINIMUM_DISTANCE);
+            cv::cornerSubPix(roi_diff,
+                             tracking_person.track_points[TP_TRANSITION_NEXT],
+                             cv::Size(5, 5),
+                             cv::Size(-1, -1),
+                             termcrit);
 
             tracking_person.InitializeForDetection();
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);
             tracking_people.push_back(tracking_person);
         }
     }
+}
+
+void PeopleDetector::DrawForDebug(cv::Mat &drawn, PD_DEBUG_ENUM type)
+{
+
 }
 
 void PeopleDetector::ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame)

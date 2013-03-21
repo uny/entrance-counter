@@ -16,7 +16,7 @@ void TrackingPerson::JustifyFeaturesPoint(const cv::Point &from_point, const cv:
     }
 }
 
-void TrackingPerson::MoveRect()
+bool TrackingPerson::MoveRect()
 {
     int sum_move_x = 0;
     int sum_move_y = 0;
@@ -54,10 +54,23 @@ void TrackingPerson::MoveRect()
         move_x = 0;
         move_y = 0;
     }
+
+    // update confidence
+    track_confidence *= (double)count / lk_status.size();
+    if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
+        std::cout << track_confidence << std::endl;
+        return false;
+    }
+    else {
+        std::cout << track_confidence << std::endl;
+    }
+
     bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + move_x);
     bounding_rect[TP_TRANSITION_NEXT].y = cvRound(bounding_rect[TP_TRANSITION_PREV].y + move_y);
     bounding_rect[TP_TRANSITION_NEXT].width = bounding_rect[TP_TRANSITION_PREV].width;
     bounding_rect[TP_TRANSITION_NEXT].height = bounding_rect[TP_TRANSITION_PREV].height;
+
+    return true;
 }
 
 void TrackingPerson::OverwriteLog()
@@ -72,13 +85,6 @@ void TrackingPerson::OverwriteLog()
             continue;
         }
         tmp_points.push_back(track_points[TP_TRANSITION_NEXT][index]);
-    }
-
-    // update confidence
-    track_confidence *= (double)tmp_points.size() / lk_status.size();
-    if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
-        missing_count = 1;
-        return;
     }
 
     bounding_rect[TP_TRANSITION_PREV] = bounding_rect[TP_TRANSITION_NEXT];
