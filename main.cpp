@@ -62,33 +62,17 @@ public:
 
             // for debug
             frame.copyTo(draw_mat);
-            for (int p_index = 0; p_index < (int)tracking_people.size(); p_index++) {
-                if (!tracking_people[p_index].track_points[1].size()) {
-                    continue;
-                }
-                cv::rectangle(draw_mat, tracking_people[p_index].bounding_rect[1], cv::Scalar(0, 255, 0), 3);
-                std::stringstream string_stream;
-                string_stream << p_index;
-                cv::putText(draw_mat, string_stream.str(), tracking_people[p_index].bounding_rect[1].tl(), cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0, 255, 0), 2, CV_AA);
-                int cur_index = 0;
-                for (int f_index = 0; f_index < (int)tracking_people[p_index].lk_status.size(); f_index++) {
-                    if (!tracking_people[p_index].lk_status[f_index] || tracking_people[p_index].track_points[0].empty()) {
-                        continue;
-                    }
-                    cv::line(draw_mat, tracking_people[p_index].track_points[0][f_index], tracking_people[p_index].track_points[1][cur_index], cv::Scalar(0, 0, 255), 2);
-                    cur_index++;
-                }
-                tracking_people[p_index].OverwriteLog();
-            }
 
-            cv::imshow("debug", draw_mat);
+            TrackingPerson::OverwriteLog(tracking_people);
+
+//            cv::imshow("debug", draw_mat);
 
 //            if (cv::waitKey(0) == 'q') {
 //                break;
 //            }
-            if (0 < cv::waitKey(1)) {
-                break;
-            }
+//            if (0 < cv::waitKey(1)) {
+//                break;
+//            }
 
 //            std::cout << (cv::getTickCount() - start_time) / cv::getTickFrequency() * 1000 << std::endl;
         }

@@ -77,7 +77,6 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                              cv::Size(5, 5),
                              cv::Size(-1, -1),
                              termcrit);
-
             tracking_person.InitializeForDetection();
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);
             tracking_people.push_back(tracking_person);

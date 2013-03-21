@@ -30,17 +30,13 @@ bool TrackingPerson::MoveRect()
     int ave_move_x;
     int ave_move_y;
 
-
+    // TODO: here, remove uncertain points
     for (index = 0; index < (int)track_points[TP_TRANSITION_PREV].size(); index++) {
         if (!lk_status[index]) {
             continue;
         }
         move_x = track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
         move_y = track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
-
-        if (std::abs(move_x) < MINIMUM_FEATURE_MOVE || std::abs(move_y) < MINIMUM_FEATURE_MOVE) {
-            continue;
-        }
 
         sum_move_x += move_x;
         sum_move_y += move_y;
@@ -58,11 +54,7 @@ bool TrackingPerson::MoveRect()
     // update confidence
     track_confidence *= (double)count / lk_status.size();
     if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
-        std::cout << track_confidence << std::endl;
         return false;
-    }
-    else {
-        std::cout << track_confidence << std::endl;
     }
 
     bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + move_x);
@@ -73,29 +65,33 @@ bool TrackingPerson::MoveRect()
     return true;
 }
 
-void TrackingPerson::OverwriteLog()
-{
-    std::vector<cv::Point2f> tmp_points;
-
-    for (int index = 0; index < (int)lk_status.size(); index++) {
-        if (!lk_status[index]) {
-            continue;
-        }
-        if (!track_points[TP_TRANSITION_NEXT][index].inside(bounding_rect[TP_TRANSITION_NEXT])) {
-            continue;
-        }
-        tmp_points.push_back(track_points[TP_TRANSITION_NEXT][index]);
-    }
-
-    bounding_rect[TP_TRANSITION_PREV] = bounding_rect[TP_TRANSITION_NEXT];
-    track_points[TP_TRANSITION_PREV].swap(tmp_points);
-}
-
 void TrackingPerson::InitializeForDetection()
 {
     // all features are valid, so should set lk_status all true (1)
     lk_status = std::vector<uchar>(track_points[1].size(), 1);
     track_confidence = 1.0;
+}
+
+void TrackingPerson::OverwriteLog(std::vector<TrackingPerson> &tracking_people)
+{
+    std::vector<cv::Point2f> tmp_points;
+    // TODO: will thin out on MoveRect, so the method does not need status filter
+    for (TrackingPerson &tracking_person : tracking_people) {
+        if (!tracking_person.track_points[TP_TRANSITION_NEXT].size()) {
+            continue;
+        }
+        for (int index = 0; index < (int)tracking_person.lk_status.size(); index++) {
+            if (!tracking_person.lk_status[index]) {
+                continue;
+            }
+//            if (!tracking_person.track_points[TP_TRANSITION_NEXT][index].inside(tracking_person.bounding_rect[TP_TRANSITION_NEXT])) {
+//                continue;
+//            }
+            tmp_points.push_back(tracking_person.track_points[TP_TRANSITION_NEXT][index]);
+        }
+        tracking_person.bounding_rect[TP_TRANSITION_PREV] = tracking_person.bounding_rect[TP_TRANSITION_NEXT];
+        tracking_person.track_points[TP_TRANSITION_PREV].swap(tmp_points);
+    }
 }
 
 void TrackingPerson::JustifySelectedFeaturesPoint(std::vector<cv::Point2f> &features, const cv::Point &from_point, const cv::Point &to_point)

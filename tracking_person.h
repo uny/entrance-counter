@@ -36,7 +36,6 @@ public:
                               const cv::Point &to_point,
                               TP_TRANSITION_ENUM select);
     bool MoveRect();
-    void OverwriteLog();
     // wide rectangle of interest for tracking
     cv::Rect ExpandRectToTrack(cv::Size frame_size);
     /**
@@ -44,11 +43,11 @@ public:
      * call after detected
      */
     void InitializeForDetection();
+    static void OverwriteLog(std::vector<TrackingPerson> &tracking_people);
 
 private:
     // margin of roi for tracking
     static const int MARGIN_WIDTH = 20;
-    static const int MINIMUM_FEATURE_MOVE = 1;
     // will be divided by 10
     static const int MINIMUM_TRACK_CONFIDENCE = 5;
 
