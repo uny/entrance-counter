@@ -22,10 +22,13 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
     int sum_move_y = 0;
     int count = 0;
 
-    int index = 0;
+    int index;
 
     int move_x;
     int move_y;
+
+    std::vector<int> move_x;
+    std::vector<int> move_y;
 
     int ave_move_x;
     int ave_move_y;
@@ -34,25 +37,25 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
     std::vector<cv::Point2f>::iterator next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
 
     // TODO: here, remove uncertain points
-    while (prev_points_iter != track_points[TP_TRANSITION_PREV].end()
-           || next_points_iter != track_points[TP_TRANSITION_NEXT].end()) {
-        if (!lk_status[index]) {
+    index = 0;
+    while (index < lk_status.size()) {
+        if (lk_status[index]) {
+            move_x.push_back(next_points_iter->x - prev_points_iter->x);
+            move_y.push_back(next_points_iter->y - prev_points_iter->y);
+
+            ++prev_points_iter;
+            ++next_points_iter;
+        }
+        else {
             prev_points_iter = track_points[TP_TRANSITION_PREV].erase(prev_points_iter);
             next_points_iter = track_points[TP_TRANSITION_NEXT].erase(next_points_iter);
             continue;
         }
-        // TODO: whether next points are too far
-        // TODO: sort and take 90% center
-        move_x = track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
-        move_y = track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
-
-        sum_move_x += move_x;
-        sum_move_y += move_y;
-        count++;
-
-        ++prev_points_iter;
-        ++next_points_iter;
+        ++index;
     }
+    // TODO: ?sort and take 90% center
+
+
     if (0 < count) {
         ave_move_x = sum_move_x / count;
         ave_move_y = sum_move_y / count;

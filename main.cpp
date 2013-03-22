@@ -65,14 +65,14 @@ public:
 
             TrackingPerson::OverwriteLog(tracking_people);
 
-//            cv::imshow("debug", draw_mat);
+            cv::imshow("debug", draw_mat);
 
 //            if (cv::waitKey(0) == 'q') {
 //                break;
 //            }
-//            if (0 < cv::waitKey(1)) {
-//                break;
-//            }
+            if (0 < cv::waitKey(1)) {
+                break;
+            }
 
 //            std::cout << (cv::getTickCount() - start_time) / cv::getTickFrequency() * 1000 << std::endl;
         }
