@@ -37,11 +37,7 @@ public:
     bool MoveRect(const std::vector<uchar> &lk_status);
     // wide rectangle of interest for tracking
     cv::Rect ExpandRectToTrack(cv::Size frame_size);
-    /**
-     * @brief InitializeForDetection
-     * call after detected
-     */
-    void InitializeForDetection();
+    void AppendCentroid();
     static void OverwriteLog(std::vector<TrackingPerson> &tracking_people);
 
 private:

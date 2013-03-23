@@ -26,14 +26,13 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 
     cv::Rect intersect_rect;
 
+    int centroid_x;
+    int centroid_y;
+
     cv::Mat unsharp_mask = (cv::Mat_<double>(3, 3) <<
                             -1.0 / 9, -1.0 / 9, -1.0 / 9,
                             -1.0 / 9, 17.0 / 9, -1.0 / 9,
                             -1.0 / 9, -1.0 / 9, -1.0 / 9);
-
-    cv::FastFeatureDetector feature_detector;
-    std::vector<cv::KeyPoint> fast_keypoints;
-    cv::FREAK freak;
 
     cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, TERMCRIT_MAX_COUNT, TERMCRIT_EPSILON / 10.0);
 
@@ -77,8 +76,10 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
                              cv::Size(5, 5),
                              cv::Size(-1, -1),
                              termcrit);
-            tracking_person.InitializeForDetection();
             tracking_person.JustifyFeaturesPoint(cv::Point(0, 0), person_rect.tl(), TP_TRANSITION_NEXT);
+            tracking_person.track_confidence = 1.0;
+            // should call this method after justified
+            tracking_person.AppendCentroid();
             tracking_people.push_back(tracking_person);
         }
     }

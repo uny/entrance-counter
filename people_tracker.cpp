@@ -64,7 +64,6 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
         ++p_iter;
     }
 
-    // TODO: it should be clone ? or copyTo?
     gray.copyTo(prev_frame_);
 }
 

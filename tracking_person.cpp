@@ -93,21 +93,18 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
     next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
 
     // add centroid
-    centroid_x = cvRound(bounding_rect[TP_TRANSITION_NEXT].x + bounding_rect[TP_TRANSITION_NEXT].width / 2);
-    centroid_y = cvRound(bounding_rect[TP_TRANSITION_NEXT].y + bounding_rect[TP_TRANSITION_NEXT].height / 2);
-    centroid.push_back(cv::Point2f(centroid_x, centroid_y));
+    AppendCentroid();
 
     // do not remove next points here for consistency with prev points size
 
     return true;
 }
 
-void TrackingPerson::InitializeForDetection()
+void TrackingPerson::AppendCentroid()
 {
-    // all features are valid, so should set lk_status all true (1)
-    // TODO: remove though unchecked, doutful
-//    lk_status = std::vector<uchar>(track_points[1].size(), 1);
-    track_confidence = 1.0;
+    int centroid_x = cvRound(bounding_rect[TP_TRANSITION_NEXT].x + bounding_rect[TP_TRANSITION_NEXT].width / 2);
+    int centroid_y = cvRound(bounding_rect[TP_TRANSITION_NEXT].y + bounding_rect[TP_TRANSITION_NEXT].height / 2);
+    centroid.push_back(cv::Point2f(centroid_x, centroid_y));
 }
 
 void TrackingPerson::OverwriteLog(std::vector<TrackingPerson> &tracking_people)
