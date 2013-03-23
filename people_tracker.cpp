@@ -68,7 +68,3 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
     gray.copyTo(prev_frame_);
 }
 
-void PeopleTracker::DrawForDebug(cv::Mat &drawn, PT_DEBUG_ENUM type)
-{
-
-}

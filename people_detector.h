@@ -10,9 +10,6 @@
 #include "image_holder.h"
 #include "tracking_person.h"
 
-typedef enum {
-    PD_DEBUG_DETECT,
-} PD_DEBUG_ENUM;
 
 class PeopleDetector
 {
@@ -20,7 +17,6 @@ public:
     PeopleDetector();
     void Init();
     void Detect(const ImageHolder &image_holder, std::vector<TrackingPerson> &tracking_people);
-    void DrawForDebug(cv::Mat &drawn, PD_DEBUG_ENUM type);
 
 private:
     cv::HOGDescriptor hog_;

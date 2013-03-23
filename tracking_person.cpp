@@ -24,22 +24,25 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
 
     int index;
 
-    int move_x;
-    int move_y;
-
     std::vector<int> move_x;
     std::vector<int> move_y;
+
+    int certain_size;
 
     int ave_move_x;
     int ave_move_y;
 
+    int centroid_x;
+    int centroid_y;
+
     std::vector<cv::Point2f>::iterator prev_points_iter = track_points[TP_TRANSITION_PREV].begin();
     std::vector<cv::Point2f>::iterator next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
 
-    // TODO: here, remove uncertain points
-    index = 0;
-    while (index < lk_status.size()) {
-        if (lk_status[index]) {
+    // remove uncertain points
+    for (index = 0; index < (int)lk_status.size(); index++) {
+        // check also bounding contain for consistency with size
+        if (lk_status[index]
+                && bounding_rect[TP_TRANSITION_PREV].contains(*prev_points_iter)) {
             move_x.push_back(next_points_iter->x - prev_points_iter->x);
             move_y.push_back(next_points_iter->y - prev_points_iter->y);
 
@@ -49,35 +52,52 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
         else {
             prev_points_iter = track_points[TP_TRANSITION_PREV].erase(prev_points_iter);
             next_points_iter = track_points[TP_TRANSITION_NEXT].erase(next_points_iter);
-            continue;
         }
-        ++index;
     }
-    // TODO: ?sort and take 90% center
+    // sort to exclude outliers
+    std::sort(move_x.begin(), move_x.end());
+    std::sort(move_y.begin(), move_y.end());
+    // prev and next point vector will have the same size
 
+    certain_size = track_points[TP_TRANSITION_PREV].size();
 
+    // certain_size / 3 -> certain_size * 2/3
+    for (index = (certain_size / EXCLUDE_OUTLINER_RATIO); index < (1 - certain_size / EXCLUDE_OUTLINER_RATIO); index++) {
+        sum_move_x += track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
+        sum_move_y += track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
+        count++;
+    }
+
+    // update confidence
+    track_confidence *= (double)count / lk_status.size();
+    if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
+        return false;
+    }
+
+    // enough confidence
     if (0 < count) {
         ave_move_x = sum_move_x / count;
         ave_move_y = sum_move_y / count;
     }
     else {
-        move_x = 0;
-        move_y = 0;
+        ave_move_x = 0;
+        ave_move_y = 0;
     }
 
-    // update confidence
-    // TODO: after checking bounding region
-    // TODO: add centroid
-    track_confidence *= (double)count / lk_status.size();
-    if (track_confidence < (MINIMUM_TRACK_CONFIDENCE / 10.0)) {
-        return false;
-    }
-    // TODO: check points are inside rect
-
-    bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + move_x);
-    bounding_rect[TP_TRANSITION_NEXT].y = cvRound(bounding_rect[TP_TRANSITION_PREV].y + move_y);
+    bounding_rect[TP_TRANSITION_NEXT].x = cvRound(bounding_rect[TP_TRANSITION_PREV].x + ave_move_x);
+    bounding_rect[TP_TRANSITION_NEXT].y = cvRound(bounding_rect[TP_TRANSITION_PREV].y + ave_move_y);
     bounding_rect[TP_TRANSITION_NEXT].width = bounding_rect[TP_TRANSITION_PREV].width;
     bounding_rect[TP_TRANSITION_NEXT].height = bounding_rect[TP_TRANSITION_PREV].height;
+
+    prev_points_iter = track_points[TP_TRANSITION_PREV].begin();
+    next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
+
+    // add centroid
+    centroid_x = cvRound(bounding_rect[TP_TRANSITION_NEXT].x + bounding_rect[TP_TRANSITION_NEXT].width / 2);
+    centroid_y = cvRound(bounding_rect[TP_TRANSITION_NEXT].y + bounding_rect[TP_TRANSITION_NEXT].height / 2);
+    centroid.push_back(cv::Point2f(centroid_x, centroid_y));
+
+    // do not remove next points here for consistency with prev points size
 
     return true;
 }
@@ -92,23 +112,12 @@ void TrackingPerson::InitializeForDetection()
 
 void TrackingPerson::OverwriteLog(std::vector<TrackingPerson> &tracking_people)
 {
-    std::vector<cv::Point2f> tmp_points;
-    // TODO: will thin out on MoveRect, so the method does not need status filter
     for (TrackingPerson &tracking_person : tracking_people) {
         if (!tracking_person.track_points[TP_TRANSITION_NEXT].size()) {
             continue;
         }
-        for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_NEXT].size(); index++) {
-//            if (!tracking_person.lk_status[index]) {
-//                continue;
-//            }
-//            if (!tracking_person.track_points[TP_TRANSITION_NEXT][index].inside(tracking_person.bounding_rect[TP_TRANSITION_NEXT])) {
-//                continue;
-//            }
-            tmp_points.push_back(tracking_person.track_points[TP_TRANSITION_NEXT][index]);
-        }
         tracking_person.bounding_rect[TP_TRANSITION_PREV] = tracking_person.bounding_rect[TP_TRANSITION_NEXT];
-        tracking_person.track_points[TP_TRANSITION_PREV].swap(tmp_points);
+        tracking_person.track_points[TP_TRANSITION_PREV].swap(tracking_person.track_points[TP_TRANSITION_NEXT]);
     }
 }
 

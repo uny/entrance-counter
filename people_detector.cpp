@@ -84,11 +84,6 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
     }
 }
 
-void PeopleDetector::DrawForDebug(cv::Mat &drawn, PD_DEBUG_ENUM type)
-{
-
-}
-
 void PeopleDetector::ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame)
 {
     rect.x -= cvRound(rect.width * (HOG_MARGIN_WIDTH * 0.01));
