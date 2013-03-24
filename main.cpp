@@ -74,21 +74,21 @@ public:
             people_counter.Count(tracking_people);
 
             // for debug
-//            frame.copyTo(draw_mat);
+            frame.copyTo(draw_mat);
 
-//            for (const TrackingPerson &tracking_person : tracking_people) {
-//                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
-//                for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
-//                    cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
-//                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
-//                }
-//                for (const cv::Point &centroid : tracking_person.centroid) {
-//                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
-//                }
-//            }
-//            people_counter.DrawForDebug(draw_mat);
+            for (const TrackingPerson &tracking_person : tracking_people) {
+                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
+                for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
+                    cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
+                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
+                }
+                for (const cv::Point &centroid : tracking_person.centroid) {
+                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
+                }
+            }
+            people_counter.DrawForDebug(draw_mat);
 
-//            cv::imshow("debug", draw_mat);
+            cv::imshow("debug", draw_mat);
 
             // overwrite next -> prev
             TrackingPerson::OverwriteLog(tracking_people);
@@ -96,9 +96,9 @@ public:
 //            if (cv::waitKey(0) == 'q') {
 //                break;
 //            }
-//            if (0 < cv::waitKey(1)) {
-//                break;
-//            }
+            if (0 < cv::waitKey(1)) {
+                break;
+            }
 
             diff_time = (cv::getTickCount() - tick_cnt) * 1000 / cv::getTickFrequency();
             if (1000 <= diff_time) {
