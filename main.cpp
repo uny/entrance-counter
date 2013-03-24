@@ -33,7 +33,6 @@ public:
         cv::initModule_video();
 
         ImageHolder image_holder;
-        image_holder.Init();
 
         std::vector<TrackingPerson> tracking_people;
 
@@ -58,31 +57,31 @@ public:
             start_time = cv::getTickCount();
             // image_holder has color, gray, diff images (it takes too much time!)
             image_holder.Update(frame);
-//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
+            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
 
             start_time = cv::getTickCount();
             // move rects of people with lucas-kanade optical flow
             people_tracker.Track(image_holder, tracking_people);
-//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
+            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
 
             start_time = cv::getTickCount();
             // add new people to tracking_people
             people_detector.Detect(image_holder, tracking_people);
-//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::endl;
+            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::endl;
 
             // for debug
             frame.copyTo(draw_mat);
 
-//            for (const TrackingPerson &tracking_person : tracking_people) {
-//                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
-//                for (int index = 0; index < tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
-//                    cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
-//                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
-//                }
-//                for (const cv::Point &centroid : tracking_person.centroid) {
-//                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
-//                }
-//            }
+            for (const TrackingPerson &tracking_person : tracking_people) {
+                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
+                for (int index = 0; index < tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
+                    cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
+                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
+                }
+                for (const cv::Point &centroid : tracking_person.centroid) {
+                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
+                }
+            }
 
             cv::imshow("debug", draw_mat);
 

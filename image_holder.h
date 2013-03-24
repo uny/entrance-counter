@@ -13,11 +13,11 @@ public:
     std::vector<cv::Rect> diff_rects;
 
     ImageHolder();
-    void Init();
     void Update(const cv::Mat &frame);
 
 private:
-    cv::Ptr<cv::BackgroundSubtractorGMG> fgbg_;
+    // segm is faster than gmg
+    cv::BackgroundSubtractorMOG2 bg_model_;
 
     static const int MINIMUM_AREA = 300;
     static const int GMG_INIT_FRAME_NUM = 20;
