@@ -11,6 +11,7 @@
 #include "tracking_person.h"
 #include "people_detector.h"
 #include "people_tracker.h"
+#include "people_counter.h"
 
 using namespace std;
 
@@ -41,6 +42,8 @@ public:
 
         PeopleTracker people_tracker;
 
+        PeopleCounter people_counter;
+
         int64 tick_cnt = cv::getTickCount();
         int64 start_time;
         int64 diff_time;
@@ -57,24 +60,25 @@ public:
             start_time = cv::getTickCount();
             // image_holder has color, gray, diff images (it takes too much time!)
             image_holder.Update(frame);
-            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
+//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
 
             start_time = cv::getTickCount();
             // move rects of people with lucas-kanade optical flow
             people_tracker.Track(image_holder, tracking_people);
-            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
+//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::flush;
 
             start_time = cv::getTickCount();
             // add new people to tracking_people
             people_detector.Detect(image_holder, tracking_people);
-            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::endl;
+//            std::cout << (cv::getTickCount() - start_time) * 1000 / cv::getTickFrequency() << ", " << std::endl;
+            people_counter.Count(tracking_people);
 
             // for debug
             frame.copyTo(draw_mat);
 
             for (const TrackingPerson &tracking_person : tracking_people) {
                 cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
-                for (int index = 0; index < tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
+                for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
                     cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
                     cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
                 }
@@ -82,6 +86,7 @@ public:
                     cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
                 }
             }
+            people_counter.DrawForDebug(draw_mat);
 
             cv::imshow("debug", draw_mat);
 
@@ -95,13 +100,13 @@ public:
                 break;
             }
 
-//            diff_time = (cv::getTickCount() - tick_cnt) * 1000 / cv::getTickFrequency();
-//            if (1000 <= diff_time) {
-//                std::cout << "fps: " << frame_cnt - prev_frame_cnt << std::endl;
-//                tick_cnt = cv::getTickCount();
-//                prev_frame_cnt = frame_cnt;
-//            }
-//            frame_cnt++;
+            diff_time = (cv::getTickCount() - tick_cnt) * 1000 / cv::getTickFrequency();
+            if (1000 <= diff_time) {
+                std::cout << "fps: " << frame_cnt - prev_frame_cnt << std::endl;
+                tick_cnt = cv::getTickCount();
+                prev_frame_cnt = frame_cnt;
+            }
+            frame_cnt++;
         }
     }
 };
