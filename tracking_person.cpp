@@ -24,49 +24,34 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
 
     int index;
 
-    std::vector<int> move_x;
-    std::vector<int> move_y;
-
     int certain_size;
 
     int ave_move_x;
     int ave_move_y;
 
-    int centroid_x;
-    int centroid_y;
-
-    std::vector<cv::Point2f>::iterator prev_points_iter = track_points[TP_TRANSITION_PREV].begin();
-    std::vector<cv::Point2f>::iterator next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
+    std::vector<cv::Point2f>::iterator prev_point_iter = track_points[TP_TRANSITION_PREV].begin();
+    std::vector<cv::Point2f>::iterator next_point_iter = track_points[TP_TRANSITION_NEXT].begin();
 
     // remove uncertain points
     for (index = 0; index < (int)lk_status.size(); index++) {
         // check also bounding contain for consistency with size
         if (lk_status[index]
-                && bounding_rect[TP_TRANSITION_PREV].contains(*prev_points_iter)) {
-            move_x.push_back(next_points_iter->x - prev_points_iter->x);
-            move_y.push_back(next_points_iter->y - prev_points_iter->y);
+                && bounding_rect[TP_TRANSITION_PREV].contains(*prev_point_iter)) {
+            sum_move_x += next_point_iter->x - prev_point_iter->x;
+            sum_move_y += next_point_iter->y - prev_point_iter->y;
 
-            ++prev_points_iter;
-            ++next_points_iter;
+            ++prev_point_iter;
+            ++next_point_iter;
+            ++count;
         }
         else {
-            prev_points_iter = track_points[TP_TRANSITION_PREV].erase(prev_points_iter);
-            next_points_iter = track_points[TP_TRANSITION_NEXT].erase(next_points_iter);
+            prev_point_iter = track_points[TP_TRANSITION_PREV].erase(prev_point_iter);
+            next_point_iter = track_points[TP_TRANSITION_NEXT].erase(next_point_iter);
         }
     }
-    // sort to exclude outliers
-    std::sort(move_x.begin(), move_x.end());
-    std::sort(move_y.begin(), move_y.end());
     // prev and next point vector will have the same size
 
     certain_size = track_points[TP_TRANSITION_PREV].size();
-
-    // certain_size / 3 -> certain_size * 2/3
-    for (index = (certain_size / EXCLUDE_OUTLINER_RATIO); index < (1 - certain_size / EXCLUDE_OUTLINER_RATIO); index++) {
-        sum_move_x += track_points[TP_TRANSITION_NEXT][index].x - track_points[TP_TRANSITION_PREV][index].x;
-        sum_move_y += track_points[TP_TRANSITION_NEXT][index].y - track_points[TP_TRANSITION_PREV][index].y;
-        count++;
-    }
 
     // update confidence
     track_confidence *= (double)count / lk_status.size();
@@ -89,8 +74,8 @@ bool TrackingPerson::MoveRect(const std::vector<uchar> &lk_status)
     bounding_rect[TP_TRANSITION_NEXT].width = bounding_rect[TP_TRANSITION_PREV].width;
     bounding_rect[TP_TRANSITION_NEXT].height = bounding_rect[TP_TRANSITION_PREV].height;
 
-    prev_points_iter = track_points[TP_TRANSITION_PREV].begin();
-    next_points_iter = track_points[TP_TRANSITION_NEXT].begin();
+    prev_point_iter = track_points[TP_TRANSITION_PREV].begin();
+    next_point_iter = track_points[TP_TRANSITION_NEXT].begin();
 
     // add centroid
     AppendCentroid();

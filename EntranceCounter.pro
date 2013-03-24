@@ -9,8 +9,7 @@ SOURCES += main.cpp \
     people_tracker.cpp \
     people_detector.cpp \
     image_holder.cpp \
-    people_counter.cpp \
-    debug_drawer.cpp
+    people_counter.cpp
 
 unix: LIBS += -L/usr/opencv/lib/\
 -lopencv_core\
@@ -29,5 +28,4 @@ HEADERS += \
     people_tracker.h \
     people_detector.h \
     image_holder.h \
-    people_counter.h \
-    debug_drawer.h
+    people_counter.h

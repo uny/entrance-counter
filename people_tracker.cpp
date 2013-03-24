@@ -37,14 +37,14 @@ void PeopleTracker::Track(const ImageHolder &image_holder, std::vector<TrackingP
         // TODO: abort
         cv::calcOpticalFlowPyrLK(prev_frame_(larger_rect),
                                  gray(larger_rect),
-                                 p_iter->track_points[0],
-                                 p_iter->track_points[1],
+                                 p_iter->track_points[TP_TRANSITION_PREV],
+                                 p_iter->track_points[TP_TRANSITION_NEXT],
                                  lk_status,
                                  lk_error);
         // check by reverse
         cv::calcOpticalFlowPyrLK(gray(larger_rect),
                                  prev_frame_(larger_rect),
-                                 p_iter->track_points[1],
+                                 p_iter->track_points[TP_TRANSITION_NEXT],
                                  reverse_track_points,
                                  reverse_lk_status,
                                  lk_error);

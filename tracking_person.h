@@ -44,7 +44,7 @@ private:
     // margin of roi for tracking
     static const int MARGIN_WIDTH = 20;
     // will be divided by 10
-    static const int MINIMUM_TRACK_CONFIDENCE = 5;
+    static const int MINIMUM_TRACK_CONFIDENCE = 3;
     // exclude less and bigger (1 / EXCLUDE_OUTLINER_POINTS)
     static const int EXCLUDE_OUTLINER_RATIO = 3;
 

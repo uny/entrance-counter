@@ -26,9 +26,6 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
 
     cv::Rect intersect_rect;
 
-    int centroid_x;
-    int centroid_y;
-
     cv::Mat unsharp_mask = (cv::Mat_<double>(3, 3) <<
                             -1.0 / 9, -1.0 / 9, -1.0 / 9,
                             -1.0 / 9, 17.0 / 9, -1.0 / 9,
