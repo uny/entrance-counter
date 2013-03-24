@@ -14,7 +14,13 @@ private:
     const cv::Point FROM_POINT = cv::Point(400, 340);
     const cv::Point TO_POINT = cv::Point(690, 200);
 
-    int Intersect(cv::Point prev_point, cv::Point next_point);
+    typedef enum {
+        PC_INTERSECT_NONE,
+        PC_INTERSECT_IN,
+        PC_INTERSECT_OUT
+    } PC_INTERSECT_ENUM;
+
+    char Intersect(cv::Point prev_point, cv::Point next_point);
     /**
      * @brief Intersect
      * @param b1 a point of base line
@@ -23,7 +29,7 @@ private:
      * @param p2 target point
      * @return 0: no 1,2: yes
      */
-    int Intersect(cv::Point b1, cv::Point b2, cv::Point p1, cv::Point p2);
+    char Intersect(cv::Point b1, cv::Point b2, cv::Point p1, cv::Point p2);
     bool CheckWhichSide(cv::Point b1, cv::Point b2, cv::Point point);
 };
 
