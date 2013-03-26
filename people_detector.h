@@ -29,10 +29,14 @@ private:
     static const int FEATURE_QUALITY = 1;
     static const int FEATURE_MINIMUM_DISTANCE = 1;
 
-    // will be divided by 10
-    static const int OVERLAP_THRESHOLD = 1;
+    const cv::Size DETECT_WIN_STRIDE = cv::Size(8, 8);
+    const cv::Size DETECT_PADDING = cv::Size(8, 8);
+    // will be devided by 100
+    static const int DETECT_SCALE = 105;
+    static const int DETECT_GROUPING = 2;
 
-    static const int FAST_THRESHOLD = 5;
+    // will be divided by 10
+    static const int OVERLAP_THRESHOLD = 5;
 
     static const int TERMCRIT_MAX_COUNT = 20;
     // will be divided by 10
@@ -40,7 +44,7 @@ private:
 
     void ExpandRoIRectForHoG(cv::Rect &rect, const cv::Mat &frame);
     cv::Mat ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &rect);
-    void JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect);
+    bool JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect, const cv::Size &image_size);
 };
 
 #endif // PEOPLE_DETECTOR_H

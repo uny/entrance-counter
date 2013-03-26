@@ -8,11 +8,15 @@ class PeopleCounter
 public:
     PeopleCounter();
     void Count(const std::vector<TrackingPerson> &tracking_people);
-    void DrawForDebug(cv::Mat &drawn);
+    void DrawForDebug(cv::Mat &drawn, const std::vector<TrackingPerson> &tracking_people);
 
 private:
-    const cv::Point FROM_POINT = cv::Point(400, 340);
+    const cv::Point FROM_POINT = cv::Point(370, 420);
     const cv::Point TO_POINT = cv::Point(690, 200);
+
+    // for debug draw
+    std::vector<int> entered_;
+    std::vector<int> exited_;
 
     typedef enum {
         PC_INTERSECT_NONE,

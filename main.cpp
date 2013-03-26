@@ -55,6 +55,10 @@ public:
             if (frame.empty()) {
                 break;
             }
+            static int draw_flag = -1;
+            if (draw_flag++ == 0) {
+                cv::waitKey(0);
+            }
 
 
             start_time = cv::getTickCount();
@@ -76,17 +80,16 @@ public:
             // for debug
             frame.copyTo(draw_mat);
 
-            for (const TrackingPerson &tracking_person : tracking_people) {
-                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
-                for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
-                    cv::circle(draw_mat, tracking_person.track_points[TP_TRANSITION_NEXT][index], 1, cv::Scalar(0, 255, 0), 3);
-                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 3);
-                }
-                for (const cv::Point &centroid : tracking_person.centroid) {
-                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
-                }
-            }
-            people_counter.DrawForDebug(draw_mat);
+//            for (const TrackingPerson &tracking_person : tracking_people) {
+//                cv::rectangle(draw_mat, tracking_person.bounding_rect[TP_TRANSITION_NEXT], cv::Scalar(0, 255, 0), 3);
+//                for (int index = 0; index < (int)tracking_person.track_points[TP_TRANSITION_PREV].size(); index++) {
+//                    cv::line(draw_mat, tracking_person.track_points[TP_TRANSITION_PREV][index], tracking_person.track_points[TP_TRANSITION_NEXT][index], cv::Scalar(0, 0, 255), 2);
+//                }
+//                for (const cv::Point &centroid : tracking_person.centroid) {
+//                    cv::circle(draw_mat, centroid, 1, cv::Scalar(255, 0, 0), 3);
+//                }
+//            }
+            people_counter.DrawForDebug(draw_mat, tracking_people);
 
             cv::imshow("debug", draw_mat);
 

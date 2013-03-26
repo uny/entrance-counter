@@ -38,11 +38,12 @@ void PeopleDetector::Detect(const ImageHolder &image_holder, std::vector<Trackin
         cv::filter2D(roi_mat, roi_mat, -1, unsharp_mask);
 
         // TODO: should set parameters
-        hog_.detectMultiScale(roi_mat, person_rects);
+        hog_.detectMultiScale(roi_mat, person_rects, 0, DETECT_WIN_STRIDE, DETECT_PADDING, DETECT_SCALE / 100.0, DETECT_GROUPING);
 
         for (cv::Rect &person_rect : person_rects) {
-            JustifyPersonRect(person_rect, roi_rect);
-            // TODO: ?check image should not out of the image
+            if (!JustifyPersonRect(person_rect, roi_rect, image_holder.gray.size())) {
+                continue;
+            }
 
             bool overlapped = false;
             for (TrackingPerson &tracking_person : tracking_people) {
@@ -108,12 +109,17 @@ cv::Mat PeopleDetector::ResizeFrameForHoG(const cv::Mat &image, const cv::Rect &
     return resized;
 }
 
-void PeopleDetector::JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect)
+bool PeopleDetector::JustifyPersonRect(cv::Rect &rect, const cv::Rect &roi_rect, const cv::Size &image_size)
 {
+    rect.x += roi_rect.x;
+    rect.y += roi_rect.y;
+
     // TODO: it should be a bit larger
     rect.width *= (double)roi_rect.width / HOG_IMAGE_WIDTH;
     rect.height *= (double)roi_rect.height / (HOG_IMAGE_WIDTH * 2);
 
-    rect.x += roi_rect.x;
-    rect.y += roi_rect.y;
+    if (image_size.width < rect.br().x || image_size.height < rect.br().y) {
+        return false;
+    }
+    return true;
 }

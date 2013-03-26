@@ -11,7 +11,7 @@ SOURCES += main.cpp \
     image_holder.cpp \
     people_counter.cpp
 
-unix: LIBS += -L/usr/opencv/lib/\
+unix: LIBS += -L/usr/local/opencv/lib/\
 -lopencv_core\
 -lopencv_highgui\
 -lopencv_video\
@@ -20,8 +20,8 @@ unix: LIBS += -L/usr/opencv/lib/\
 -lopencv_features2d\
 -lopencv_legacy
 
-INCLUDEPATH += /usr/opencv/include
-DEPENDPATH += /usr/opencv/include
+INCLUDEPATH += /usr/local/opencv/include
+DEPENDPATH += /usr/local/opencv/include
 
 HEADERS += \
     tracking_person.h \
